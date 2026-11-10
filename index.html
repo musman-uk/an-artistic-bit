@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full select-none">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bytes on Canvas</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Space Grotesk', 'Inter', 'sans-serif'],
+            pixel: ['"Press Start 2P"', 'monospace'],
+            osd: ['VT323', 'monospace'],
+            code: ['"Fira Code"', 'monospace'],
+            inter: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="theme-midnight h-full flex flex-col antialiased overflow-hidden transition-colors duration-300">
+
+  <!-- HEADER TOOLBAR -->
+  <header class="h-16 shrink-0 border-b border-white/10 px-3 md:px-6 flex items-center justify-between glass-panel z-30">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-lime-500 via-cyan-400 to-indigo-500 p-0.5 shadow-lg">
+        <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+          <i class="fa-solid fa-cubes text-lime-400 text-sm"></i>
+        </div>
+      </div>
+      <div>
+        <h1 class="text-sm md:text-base font-bold tracking-tight theme-header-title">Bytes on Canvas</h1>
+        <p class="text-[9px] font-mono opacity-70 hidden sm:block">Where Technology meets art (or not)</p>
+      </div>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="flex items-center bg-black/50 p-1 rounded-xl border border-white/10">
+      <button id="btn-mode-studio" onclick="app.setMode('studio')" class="px-2.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 sm:space-x-2 theme-btn-accent">
+        <i class="fa-solid fa-paintbrush text-xs"></i>
+        <span>Studio</span>
+      </button>
+      <button id="btn-mode-sandbox" onclick="app.setMode('sandbox')" class="px-2.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium opacity-60 hover:opacity-100 transition flex items-center space-x-1.5 sm:space-x-2">
+        <i class="fa-solid fa-atom text-xs"></i>
+        <span>Sandbox</span>
+      </button>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center space-x-1.5 sm:space-x-2">
+      <select id="select-theme" onchange="app.setTheme(this.value)" class="bg-black/60 border border-white/20 text-xs rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none">
+        <option value="midnight">Midnight Studio</option>
+        <option value="gbc">Game Boy Color-Style</option>
+        <option value="tv">14" CRT Phillips-Style</option>
+        <option value="workstation">16" Workstation CRT</option>
+      </select>
+
+      <button id="btn-focus-toggle" onclick="app.toggleFocusMode()" class="px-2 py-1.5 rounded-lg bg-black/60 border border-white/20 hover:bg-white/10 text-xs font-mono flex items-center space-x-1" title="Toggle Focus Mode">
+        <i class="fa-solid fa-expand text-amber-400"></i>
+        <span class="hidden lg:inline" id="label-focus">Focus View</span>
+      </button>
+
+      <button id="btn-toggle-audio" onclick="app.toggleAudio()" class="p-2 rounded-lg bg-black/60 border border-white/20 hover:bg-white/10 text-xs" title="Toggle Synth Audio">
+        <i id="icon-audio" class="fa-solid fa-volume-high text-lime-400"></i>
+      </button>
+
+      <button id="btn-toggle-crt" onclick="app.toggleCRT()" class="p-2 rounded-lg bg-black/60 border border-white/20 hover:bg-white/10 text-xs" title="Toggle CRT Scanlines">
+        <i class="fa-solid fa-tv text-cyan-400"></i>
+      </button>
+
+      <button onclick="app.openModal('modal-devtools')" class="p-2 sm:px-2.5 sm:py-1.5 rounded-lg bg-black/60 border border-white/20 hover:bg-white/10 text-xs font-mono flex items-center space-x-1.5" title="Developer Utilities">
+        <i class="fa-solid fa-code text-emerald-400"></i>
+        <span class="hidden xl:inline">Dev Tools</span>
+      </button>
+
+      <button onclick="app.openModal('modal-builders-byte')" class="px-2.5 py-1.5 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/30 text-xs font-medium flex items-center space-x-1">
+        <i class="fa-solid fa-quote-left"></i>
+        <span class="hidden sm:inline">Builder's Byte</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden relative" id="main-workspace">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-full md:w-80 shrink-0 border-b md:border-b-0 md:border-r border-white/10 glass-panel flex flex-col z-10">
+      
+      <!-- STUDIO MODE DRAWING TOOLS -->
+      <div id="panel-studio-tools" class="p-3 sm:p-4 space-y-3 sm:space-y-4">
+        <div>
+          <label class="text-[10px] font-mono uppercase tracking-wider opacity-70 mb-2 block">Drawing Tools</label>
+          <div class="grid grid-cols-5 gap-1.5">
+            <button onclick="app.setTool('pencil')" id="tool-pencil" class="tool-btn p-2 rounded-xl bg-indigo-600 text-white flex flex-col items-center justify-center space-y-1 transition">
+              <i class="fa-solid fa-pencil text-xs"></i>
+              <span class="text-[9px]">Pencil</span>
+            </button>
+            <button onclick="app.setTool('line')" id="tool-line" class="tool-btn p-2 rounded-xl bg-black/40 border border-white/10 flex flex-col items-center justify-center space-y-1 transition">
+              <i class="fa-solid fa-slash text-xs"></i>
+              <span class="text-[9px]">Line</span>
+            </button>
+            <button onclick="app.setTool('bucket')" id="tool-bucket" class="tool-btn p-2 rounded-xl bg-black/40 border border-white/10 flex flex-col items-center justify-center space-y-1 transition">
+              <i class="fa-solid fa-fill-drip text-xs"></i>
+              <span class="text-[9px]">Fill</span>
+            </button>
+            <button onclick="app.setTool('eraser')" id="tool-eraser" class="tool-btn p-2 rounded-xl bg-black/40 border border-white/10 flex flex-col items-center justify-center space-y-1 transition">
+              <i class="fa-solid fa-eraser text-xs"></i>
+              <span class="text-[9px]">Eraser</span>
+            </button>
+            <button onclick="app.setTool('picker')" id="tool-picker" class="tool-btn p-2 rounded-xl bg-black/40 border border-white/10 flex flex-col items-center justify-center space-y-1 transition">
+              <i class="fa-solid fa-eye-dropper text-xs"></i>
+              <span class="text-[9px]">Sample</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-mono uppercase tracking-wider opacity-70 mb-1.5 block">Symmetry Axis</label>
+          <div class="grid grid-cols-4 gap-1 bg-black/40 p-1 rounded-xl border border-white/10">
+            <button id="sym-off" onclick="app.setSymmetry('off')" class="sym-btn py-1 rounded-lg text-xs bg-indigo-600 text-white">Off</button>
+            <button id="sym-x" onclick="app.setSymmetry('x')" class="sym-btn py-1 rounded-lg text-xs opacity-70 hover:opacity-100">X-Axis</button>
+            <button id="sym-y" onclick="app.setSymmetry('y')" class="sym-btn py-1 rounded-lg text-xs opacity-70 hover:opacity-100">Y-Axis</button>
+            <button id="sym-quad" onclick="app.setSymmetry('quad')" class="sym-btn py-1 rounded-lg text-xs opacity-70 hover:opacity-100">4-Way</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SANDBOX MODE PHYSICS BEHAVIORS -->
+      <div id="panel-sandbox-tools" class="p-3 sm:p-4 space-y-3 sm:space-y-4 hidden">
+        <div>
+          <label class="text-[10px] font-mono uppercase tracking-wider text-cyan-400 mb-2 block flex items-center space-x-1.5">
+            <i class="fa-solid fa-atom"></i>
+            <span>PHYSICS REACTOR // LIVE</span>
+          </label>
+
+          <div class="space-y-2">
+            <button onclick="app.setBehavior('sand')" id="behavior-sand" class="behavior-btn w-full p-2.5 rounded-xl bg-black/40 border border-lime-500/50 text-left hover:bg-white/5 transition flex items-start space-x-3">
+              <div class="p-2 rounded-lg bg-amber-500/20 text-amber-400 mt-0.5">
+                <i class="fa-solid fa-hourglass-half text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold">Sand Gravity</div>
+                <div class="text-[9px] opacity-70">Pixels drop and tumble into granular piles.</div>
+              </div>
+            </button>
+
+            <button onclick="app.setBehavior('glitch')" id="behavior-glitch" class="behavior-btn w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-left hover:bg-white/5 transition flex items-start space-x-3">
+              <div class="p-2 rounded-lg bg-
