@@ -361,13 +361,13 @@ class BytesOnCanvasApp {
   }
 
   setGridSize(size) {
-    this.state.gridSize = size;
+    this.state.resizeGrid(size);
+
     [16, 32, 48].forEach(s => {
       const btn = document.getElementById(`grid-size-${s}`);
       if (btn) btn.className = s === size ? "px-2 py-0.5 rounded text-xs bg-indigo-600 text-white" : "px-2 py-0.5 rounded text-xs bg-black/40 text-slate-400";
     });
 
-    this.state.initGrid();
     this.resizeCanvas();
   }
 
