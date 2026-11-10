@@ -3,51 +3,76 @@ export class PhysicsEngine {
     if (Math.random() > state.simSpeed * 0.8) return;
 
     if (state.currentBehavior === 'sand') {
-      let moved = false;
-      for (let y = state.gridSize - 2; y >= 0; y--) {
-        for (let x = 0; x < state.gridSize; x++) {
-          const current = state.grid[y][x];
-          if (current) {
-            if (!state.grid[y + 1][x]) {
-              state.grid[y + 1][x] = current;
-              state.grid[y][x] = null;
-              moved = true;
-            } else {
-              const leftEmpty = x > 0 && !state.grid[y + 1][x - 1];
-              const rightEmpty = x < state.gridSize - 1 && !state.grid[y + 1][x + 1];
+      this.updateSand(state, synth);
+    } else if (state.currentBehavior === 'glitch') {
+      this.updateGlitch(state);
+    } else if (state.currentBehavior === 'bleed') {
+      this.updateBleed(state);
+    }
+  }
 
-              if (leftEmpty && rightEmpty) {
-                const dir = Math.random() < 0.5 ? -1 : 1;
-                state.grid[y + 1][x + dir] = current;
-                state.grid[y][x] = null;
-                moved = true;
-              } else if (leftEmpty) {
-                state.grid[y + 1][x - 1] = current;
-                state.grid[y][x] = null;
-                moved = true;
-              } else if (rightEmpty) {
-                state.grid[y + 1][x + 1] = current;
-                state.grid[y][x] = null;
-                moved = true;
-              }
-            }
+  static updateSand(state, synth) {
+    let moved = false;
+
+    // Bottom-up scan to prevent double-falling in a single tick
+    for (let y = state.gridSize - 2; y >= 0; y--) {
+      // Alternate scan direction per row to eliminate right-side piling bias
+      const xIndices = Array.from({ length: state.gridSize }, (_, i) => i);
+      if (Math.random() < 0.5) xIndices.reverse();
+
+      for (const x of xIndices) {
+        const current = state.grid[y][x];
+        if (!current) continue;
+
+        // 1. Direct fall
+        if (!state.grid[y + 1][x]) {
+          state.grid[y + 1][x] = current;
+          state.grid[y][x] = null;
+          moved = true;
+        } else {
+          // 2. Diagonal tumble
+          const leftEmpty = x > 0 && !state.grid[y + 1][x - 1];
+          const rightEmpty = x < state.gridSize - 1 && !state.grid[y + 1][x + 1];
+
+          if (leftEmpty && rightEmpty) {
+            const dir = Math.random() < 0.5 ? -1 : 1;
+            state.grid[y + 1][x + dir] = current;
+            state.grid[y][x] = null;
+            moved = true;
+          } else if (leftEmpty) {
+            state.grid[y + 1][x - 1] = current;
+            state.grid[y][x] = null;
+            moved = true;
+          } else if (rightEmpty) {
+            state.grid[y + 1][x + 1] = current;
+            state.grid[y][x] = null;
+            moved = true;
           }
         }
       }
-      if (moved && Math.random() < 0.15) {
-        synth.playSound('sand', state.activeTheme, state.audioEnabled);
+    }
+
+    if (moved && Math.random() < 0.15) {
+      synth.playSound('sand', state.activeTheme, state.audioEnabled);
+    }
+  }
+
+  static updateGlitch(state) {
+    const count = Math.max(2, Math.floor(state.gridSize / 8));
+    for (let i = 0; i < count; i++) {
+      const rx = Math.floor(Math.random() * state.gridSize);
+      const ry = Math.floor(Math.random() * state.gridSize);
+      if (state.grid[ry][rx]) {
+        state.grid[ry][rx] = PhysicsEngine.shiftColorHue(state.grid[ry][rx], 14);
       }
-    } else if (state.currentBehavior === 'glitch') {
-      for (let i = 0; i < 2; i++) {
-        const rx = Math.floor(Math.random() * state.gridSize);
-        const ry = Math.floor(Math.random() * state.gridSize);
-        if (state.grid[ry][rx]) {
-          state.grid[ry][rx] = PhysicsEngine.shiftColorHue(state.grid[ry][rx], 14);
-        }
-      }
-    } else if (state.currentBehavior === 'bleed') {
-      const rx = Math.floor(Math.random() * (state.gridSize - 2)) + 1;
-      const ry = Math.floor(Math.random() * (state.gridSize - 2)) + 1;
+    }
+  }
+
+  static updateBleed(state) {
+    const count = Math.max(1, Math.floor(state.gridSize / 16));
+    for (let i = 0; i < count; i++) {
+      const rx = Math.floor(Math.random() * state.gridSize);
+      const ry = Math.floor(Math.random() * (state.gridSize - 1));
       if (state.grid[ry][rx] && !state.grid[ry + 1][rx]) {
         state.grid[ry + 1][rx] = state.grid[ry][rx];
       }
@@ -58,9 +83,13 @@ export class PhysicsEngine {
     const waveColor = state.currentColor;
     let radius = 1;
 
+    if (!state.activeTimers) state.activeTimers = [];
+
     const interval = setInterval(() => {
-      if (radius > state.gridSize) {
+      // Cancel timer if wave exits grid or user leaves sandbox mode
+      if (radius > state.gridSize * 1.5 || state.currentMode !== 'sandbox') {
         clearInterval(interval);
+        state.activeTimers = state.activeTimers.filter(t => t !== interval);
         return;
       }
 
@@ -74,18 +103,27 @@ export class PhysicsEngine {
       }
       radius += 1.5;
     }, 45);
+
+    state.activeTimers.push(interval);
   }
 
   static shiftColorHue(hex, degree) {
     if (!hex || !hex.startsWith('#')) return hex;
-    let r = parseInt(hex.slice(1, 3), 16) || 0;
-    let g = parseInt(hex.slice(3, 5), 16) || 0;
-    let b = parseInt(hex.slice(5, 7), 16) || 0;
 
-    r = (r + degree) % 255;
-    g = (g + degree / 2) % 255;
-    b = (b + degree * 2) % 255;
+    let fullHex = hex;
+    if (hex.length === 4) {
+      fullHex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
 
-    return `#${Math.floor(r).toString(16).padStart(2, '0')}${Math.floor(g).toString(16).padStart(2, '0')}${Math.floor(b).toString(16).padStart(2, '0')}`;
+    let r = parseInt(fullHex.slice(1, 3), 16) || 0;
+    let g = parseInt(fullHex.slice(3, 5), 16) || 0;
+    let b = parseInt(fullHex.slice(5, 7), 16) || 0;
+
+    r = (r + degree) % 256;
+    g = (g + Math.floor(degree / 2)) % 256;
+    b = (b + degree * 2) % 256;
+
+    const toHex = (val) => Math.floor(val).toString(16).padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
 }
