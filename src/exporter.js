@@ -35,21 +35,27 @@ export class Exporter {
 
   static copyMatrixJSON(grid) {
     const json = JSON.stringify(grid, null, 2);
-    const temp = document.createElement('textarea');
-    temp.value = json;
-    document.body.appendChild(temp);
-    temp.select();
-    document.execCommand('copy');
-    document.body.removeChild(temp);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(json);
+    } else {
+      const temp = document.createElement('textarea');
+      temp.value = json;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+    }
   }
 
   static downloadMatrixJSON(grid) {
     const json = JSON.stringify(grid, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = url;
     a.download = `canvas-matrix-${Date.now()}.json`;
     a.click();
+    URL.revokeObjectURL(url);
   }
 
   static downloadSpritePNG(grid, gridSize, scale) {
@@ -76,7 +82,9 @@ export class Exporter {
   }
 
   static renderSouvenirCard(sourceCanvas, housingTitle, activePixels, entropy, gridSize) {
-    const offCanvas = document.getElementById('offscreen-card-canvas');
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width = 600;
+    offCanvas.height = 720;
     const ctx = offCanvas.getContext('2d');
     const w = offCanvas.width;
     const h = offCanvas.height;
@@ -100,36 +108,34 @@ export class Exporter {
     ctx.font = '13px "JetBrains Mono", monospace';
     ctx.fillText(`HARDWARE THEME : ${housingTitle.toUpperCase()}`, 40, 92);
 
-    const img = new Image();
-    img.src = sourceCanvas.toDataURL();
-    img.onload = () => {
-      const size = 360;
-      const x = (w - size) / 2;
-      const y = 120;
+    const size = 360;
+    const x = (w - size) / 2;
+    const y = 120;
 
-      ctx.fillStyle = '#020617';
-      ctx.fillRect(x - 10, y - 10, size + 20, size + 20);
-      ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x - 10, y - 10, size + 20, size + 20);
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(x - 10, y - 10, size + 20, size + 20);
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x - 10, y - 10, size + 20, size + 20);
 
-      ctx.drawImage(img, x, y, size, size);
+    // Draw source canvas directly without HTMLImageElement overhead
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(sourceCanvas, x, y, size, size);
 
-      ctx.fillStyle = '#a3e635';
-      ctx.font = '14px "JetBrains Mono", monospace';
-      ctx.fillText(`ACTIVE PIXELS : ${activePixels}`, 50, 530);
-      ctx.fillText(`ENTROPY SCORE : ${entropy.toFixed(2)} bits`, 50, 560);
-      ctx.fillText(`GRID RESOLUTION: ${gridSize} x ${gridSize}`, 50, 590);
-      ctx.fillText(`TIMESTAMP     : ${new Date().toISOString().slice(0, 10)}`, 50, 620);
+    ctx.fillStyle = '#a3e635';
+    ctx.font = '14px "JetBrains Mono", monospace';
+    ctx.fillText(`ACTIVE PIXELS : ${activePixels}`, 50, 530);
+    ctx.fillText(`ENTROPY SCORE : ${entropy.toFixed(2)} bits`, 50, 560);
+    ctx.fillText(`GRID RESOLUTION: ${gridSize} x ${gridSize}`, 50, 590);
+    ctx.fillText(`TIMESTAMP     : ${new Date().toISOString().slice(0, 10)}`, 50, 620);
 
-      ctx.fillStyle = '#06b6d4';
-      ctx.font = 'bold 12px "JetBrains Mono", monospace';
-      ctx.fillText("• BUILDER'S BYTE CERTIFIED HARDWARE ARTIFACT •", 110, 690);
+    ctx.fillStyle = '#06b6d4';
+    ctx.font = 'bold 12px "JetBrains Mono", monospace';
+    ctx.fillText("• BUILDER'S BYTE CERTIFIED HARDWARE ARTIFACT •", 110, 690);
 
-      const a = document.createElement('a');
-      a.download = `Bytes-On-Canvas-Souvenir-${Date.now()}.png`;
-      a.href = offCanvas.toDataURL('image/png');
-      a.click();
-    };
+    const a = document.createElement('a');
+    a.download = `Bytes-On-Canvas-Souvenir-${Date.now()}.png`;
+    a.href = offCanvas.toDataURL('image/png');
+    a.click();
   }
 }
