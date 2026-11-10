@@ -35,6 +35,31 @@ export class AppState {
     this.saveUndoState();
   }
 
+  resizeGrid(newSize) {
+    if (this.gridSize === newSize) return;
+
+    // Save current canvas to undo stack before resizing
+    this.saveUndoState();
+
+    const oldSize = this.gridSize;
+    const oldGrid = this.grid;
+    const newGrid = Array(newSize).fill(null).map(() => Array(newSize).fill(null));
+
+    // Nearest-neighbor resampling to scale pixels to the new resolution
+    for (let newY = 0; newY < newSize; newY++) {
+      for (let newX = 0; newX < newSize; newX++) {
+        const oldX = Math.floor((newX / newSize) * oldSize);
+        const oldY = Math.floor((newY / newSize) * oldSize);
+        if (oldGrid[oldY] && oldGrid[oldY][oldX] !== undefined) {
+          newGrid[newY][newX] = oldGrid[oldY][oldX];
+        }
+      }
+    }
+
+    this.gridSize = newSize;
+    this.grid = newGrid;
+  }
+
   saveUndoState() {
     if (this.undoStack.length > 25) this.undoStack.shift();
     const copy = this.grid.map(row => [...row]);
