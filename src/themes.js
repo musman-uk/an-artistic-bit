@@ -15,17 +15,30 @@ export const THEME_TITLES = {
 
 export class ThemeManager {
   static applyTheme(themeKey, state) {
+    if (!THEME_TITLES[themeKey]) themeKey = 'midnight';
     state.activeTheme = themeKey;
-    document.body.className = `theme-${themeKey} h-full flex flex-col antialiased overflow-hidden transition-colors duration-300`;
 
+    // Remove existing theme classes without wiping structural utilities
+    const classList = Array.from(document.body.classList).filter(c => !c.startsWith('theme-'));
+    classList.push(`theme-${themeKey}`);
+    document.body.className = classList.join(' ');
+
+    // Hide all hardware shell containers
     ['shell-midnight', 'shell-gbc', 'shell-tv', 'shell-workstation'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.add('hidden');
     });
 
+    // Reveal target shell
     const activeShell = document.getElementById(`shell-${themeKey}`);
     if (activeShell) {
       activeShell.classList.remove('hidden');
+    }
+
+    // Keep dropdown selection synced in UI
+    const selectEl = document.getElementById('select-theme');
+    if (selectEl && selectEl.value !== themeKey) {
+      selectEl.value = themeKey;
     }
   }
 }
