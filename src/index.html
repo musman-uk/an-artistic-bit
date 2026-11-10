@@ -47,7 +47,7 @@
       </div>
       <div>
         <h1 class="text-sm md:text-base font-bold tracking-tight theme-header-title">Bytes on Canvas</h1>
-        <p class="text-[9px] font-mono opacity-70 hidden sm:block">Where Technology meets art (or not)</p>
+        <p class="text-[9px] font-mono opacity-70 hidden sm:block">Tactile Retro Hardware Sandbox</p>
       </div>
     </div>
 
@@ -162,4 +162,465 @@
             </button>
 
             <button onclick="app.setBehavior('glitch')" id="behavior-glitch" class="behavior-btn w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-left hover:bg-white/5 transition flex items-start space-x-3">
-              <div class="p-2 rounded-lg bg-
+              <div class="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 mt-0.5">
+                <i class="fa-solid fa-bug text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold">Glitch Decay</div>
+                <div class="text-[9px] opacity-70">Drawn pixels pulse, shift hue, and mutate.</div>
+              </div>
+            </button>
+
+            <button onclick="app.setBehavior('bleed')" id="behavior-bleed" class="behavior-btn w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-left hover:bg-white/5 transition flex items-start space-x-3">
+              <div class="p-2 rounded-lg bg-rose-500/20 text-rose-400 mt-0.5">
+                <i class="fa-solid fa-fire-flame-curved text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold">Heat Bleed</div>
+                <div class="text-[9px] opacity-70">Colors diffuse into adjacent cells like watercolor.</div>
+              </div>
+            </button>
+
+            <button onclick="app.setBehavior('wave')" id="behavior-wave" class="behavior-btn w-full p-2.5 rounded-xl bg-black/40 border border-white/10 text-left hover:bg-white/5 transition flex items-start space-x-3">
+              <div class="p-2 rounded-lg bg-cyan-500/20 text-cyan-400 mt-0.5">
+                <i class="fa-solid fa-water text-xs"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold">Wave Echo</div>
+                <div class="text-[9px] opacity-70">Clicks send expanding harmonic ripple rings.</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-black/40 p-3 rounded-xl border border-white/10">
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="text-[10px] font-mono opacity-70">Sim Speed</label>
+            <span id="label-sim-speed" class="text-xs font-mono text-lime-400">1.0x</span>
+          </div>
+          <input type="range" min="0.2" max="3" step="0.2" value="1" oninput="app.setSimSpeed(this.value)" class="w-full accent-lime-400 cursor-pointer" />
+        </div>
+      </div>
+
+      <!-- PERSISTENT PALETTE SWATCHES -->
+      <div class="px-3 sm:px-4 py-2.5 sm:py-3 border-t border-white/10 space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="text-[10px] font-mono uppercase tracking-wider opacity-70">Palette Swatches</label>
+          <select id="select-preset-palette" onchange="app.loadPalettePreset(this.value)" class="bg-black/60 border border-white/20 text-[10px] rounded-lg px-2 py-0.5 focus:outline-none">
+            <option value="midnight">Midnight Neon</option>
+            <option value="gbc">GBC Olive</option>
+            <option value="arcade">Arcade Classics</option>
+            <option value="pastel">Paper Pastel</option>
+            <option value="monochrome">Phosphor Matrix</option>
+          </select>
+        </div>
+
+        <div id="palette-swatches" class="grid grid-cols-8 gap-1.5 p-2 bg-black/40 rounded-xl border border-white/10"></div>
+
+        <div class="flex items-center justify-between bg-black/30 p-2 rounded-xl border border-white/10">
+          <span class="text-xs font-mono opacity-80">Selected Color</span>
+          <div class="flex items-center space-x-2">
+            <input type="color" id="input-color-picker" value="#6366f1" onchange="app.setColor(this.value)" class="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0" />
+            <span id="label-hex-code" class="text-xs font-mono">#6366F1</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANVAS UTILITIES -->
+      <div class="mt-auto p-3 sm:p-4 border-t border-white/10 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <label class="text-[10px] font-mono opacity-70">Grid Size</label>
+          <div class="flex items-center space-x-1">
+            <button onclick="app.setGridSize(16)" id="grid-size-16" class="px-2 py-0.5 rounded text-xs bg-black/40 text-slate-400">16x16</button>
+            <button onclick="app.setGridSize(32)" id="grid-size-32" class="px-2 py-0.5 rounded text-xs bg-indigo-600 text-white">32x32</button>
+            <button onclick="app.setGridSize(48)" id="grid-size-48" class="px-2 py-0.5 rounded text-xs bg-black/40 text-slate-400">48x48</button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono opacity-70">Gridlines</span>
+          <button id="btn-toggle-gridlines" onclick="app.toggleGridlines()" class="px-2.5 py-0.5 rounded bg-black/60 text-xs font-mono text-lime-400">
+            ON
+          </button>
+        </div>
+
+        <div class="pt-1 grid grid-cols-2 gap-2">
+          <button onclick="app.undo()" class="px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs font-medium hover:bg-white/10 transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Undo</span>
+          </button>
+          <button onclick="app.clearCanvas()" class="px-3 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 hover:bg-rose-500/30 text-xs font-medium transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Clear</span>
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- CENTER VIEWPORT -->
+    <section class="flex-1 min-h-[420px] sm:min-h-[500px] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 relative overflow-hidden bg-black/30" id="hardware-viewport">
+      
+      <!-- THEME 1: MIDNIGHT STUDIO -->
+      <div id="shell-midnight" class="w-full max-w-[85vw] sm:max-w-md aspect-square flex flex-col items-center justify-center p-2 sm:p-3 bg-slate-900/90 rounded-2xl border border-indigo-500/30 shadow-2xl relative canvas-container crt-screen-wrapper">
+        <div class="screen-glare"></div>
+        <canvas id="canvas-midnight" class="w-full h-full object-contain cursor-crosshair rounded-xl"></canvas>
+      </div>
+
+      <!-- THEME 2: GAME BOY COLOR-STYLE -->
+      <div id="shell-gbc" class="shell-gbc p-4 sm:p-6 flex flex-col items-center justify-between relative shadow-2xl hidden max-w-[90vw] sm:max-w-[450px]">
+        <div class="bezel-gbc p-3 sm:p-4 w-full flex flex-col items-center relative">
+          <div class="shell-hardware-el w-full flex items-center justify-between text-[10px] font-pixel text-slate-400 mb-2 px-1">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500 inline-block animate-pulse"></span>
+              <span class="text-[8px] text-rose-400 font-bold">POWER</span>
+            </div>
+            <span class="tracking-widest text-[9px] text-lime-400">COLOR MATRIX</span>
+          </div>
+
+          <div class="canvas-container crt-screen-wrapper relative aspect-square w-full max-w-[75vw] sm:w-72 sm:h-72 flex items-center justify-center bg-stone-900 rounded-lg border-2 border-slate-950 overflow-hidden shadow-inner">
+            <div class="screen-glare"></div>
+            <canvas id="canvas-gbc" class="w-full h-full object-contain cursor-crosshair"></canvas>
+          </div>
+        </div>
+
+        <div class="shell-hardware-el w-full mt-3 sm:mt-4 flex items-center justify-between px-2 hardware-controls-overlay">
+          <div class="d-pad" title="Navigation D-Pad">
+            <div class="d-pad-h"></div>
+            <div class="d-pad-v"></div>
+          </div>
+
+          <div class="flex space-x-3 transform -rotate-12">
+            <div class="flex flex-col items-center">
+              <button onclick="app.setTool('pencil')" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-600 border-2 border-pink-900 shadow-lg active:translate-y-0.5 tactile-btn flex items-center justify-center text-white text-[10px] font-bold">B</button>
+              <span class="text-[8px] font-pixel mt-1 opacity-70">DRAW</span>
+            </div>
+            <div class="flex flex-col items-center -mt-2">
+              <button onclick="app.setTool('bucket')" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-pink-600 border-2 border-pink-900 shadow-lg active:translate-y-0.5 tactile-btn flex items-center justify-center text-white text-[10px] font-bold">A</button>
+              <span class="text-[8px] font-pixel mt-1 opacity-70">FILL</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shell-hardware-el w-full mt-3 sm:mt-4 flex items-center justify-between px-4 sm:px-6">
+          <div class="flex space-x-2 transform -rotate-12">
+            <button onclick="app.undo()" class="w-8 h-3 rounded-full bg-slate-700 border border-slate-900 shadow tactile-btn text-[7px] font-pixel text-slate-300">SELECT</button>
+            <button onclick="app.clearCanvas()" class="w-8 h-3 rounded-full bg-slate-700 border border-slate-900 shadow tactile-btn text-[7px] font-pixel text-slate-300">START</button>
+          </div>
+          <div class="flex space-x-1.5">
+            <div class="speaker-slit"></div>
+            <div class="speaker-slit"></div>
+            <div class="speaker-slit"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THEME 3: 14" CRT PHILLIPS-STYLE -->
+      <div id="shell-tv" class="shell-tv p-3 sm:p-5 flex flex-col items-center justify-between relative shadow-2xl hidden max-w-[92vw] sm:max-w-[680px]">
+        <div class="shell-hardware-el w-full flex items-center justify-between px-3 pb-2 font-mono">
+          <span class="font-pixel text-xs sm:text-sm font-bold tracking-widest text-slate-700">PHILLIPS</span>
+          <div class="flex items-center space-x-2">
+            <span class="text-[9px] font-bold text-slate-600">POWER</span>
+            <button onclick="app.toggleCRT()" class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-slate-900 shadow-sm animate-pulse hover:scale-110 transition tactile-btn" title="Toggle Power / CRT"></button>
+          </div>
+        </div>
+
+        <div class="tv-screen-bezel p-2.5 sm:p-4 w-full flex flex-col items-center relative">
+          <div class="shell-hardware-el w-full flex items-center justify-between text-[11px] sm:text-[12px] font-osd text-emerald-400 mb-1 px-1 sm:px-2">
+            <span class="font-bold tracking-wider">CH 03 // AV-1</span>
+            <span class="opacity-80">14" TUBE 4:3</span>
+          </div>
+
+          <div class="canvas-container crt-screen-wrapper relative aspect-square w-full max-w-[75vw] sm:w-72 sm:h-72 flex items-center justify-center bg-stone-950 rounded-2xl border-2 border-stone-800 overflow-hidden shadow-inner">
+            <div class="screen-glare"></div>
+            <canvas id="canvas-tv" class="w-full h-full object-contain cursor-crosshair"></canvas>
+          </div>
+        </div>
+
+        <div class="shell-hardware-el w-full mt-2.5 p-2 sm:p-2.5 bg-slate-300/80 rounded-2xl border border-slate-400 shadow-inner flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div class="w-20 sm:w-24 flex flex-col space-y-1 py-1 px-1 hidden sm:flex">
+            <div class="tv-speaker-slot"></div>
+            <div class="tv-speaker-slot"></div>
+            <div class="tv-speaker-slot"></div>
+            <div class="tv-speaker-slot"></div>
+          </div>
+
+          <div class="flex items-center space-x-1 sm:space-x-1.5 font-osd">
+            <button onclick="app.setTool('picker')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">MENU</button>
+            <button onclick="app.setTool('pencil')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">P/CH-</button>
+            <button onclick="app.setTool('line')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">P/CH+</button>
+            <button onclick="app.setTool('bucket')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">VOL-</button>
+            <button onclick="app.setTool('eraser')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">VOL+</button>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-1.5 bg-slate-400/50 p-1 rounded-lg border border-slate-400" title="Front RCA Video & Audio Inputs">
+              <div class="rca-jack-yellow" title="Video Input (Yellow)"></div>
+              <div class="rca-jack-white" title="Mono Audio Input (White)"></div>
+            </div>
+
+            <div class="w-20 sm:w-24 flex flex-col space-y-1 py-1 px-1 hidden sm:flex">
+              <div class="tv-speaker-slot"></div>
+              <div class="tv-speaker-slot"></div>
+              <div class="tv-speaker-slot"></div>
+              <div class="tv-speaker-slot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THEME 4: 16" WORKSTATION CRT -->
+      <div id="shell-workstation" class="shell-workstation flex flex-col items-center relative hidden max-w-[90vw] sm:max-w-[620px]">
+        <div class="workstation-monitor p-3 sm:p-5 w-full flex flex-col items-center shadow-2xl">
+          <div class="workstation-bezel w-full p-3 sm:p-4 flex flex-col items-center">
+            <div class="shell-hardware-el w-full flex items-center justify-between text-[10px] sm:text-xs font-code text-emerald-400 mb-2 px-1">
+              <span class="font-bold">VT-100 TERMINAL</span>
+              <span class="text-emerald-500">75 Hz</span>
+            </div>
+
+            <div class="canvas-container crt-screen-wrapper relative aspect-square w-full max-w-[75vw] sm:w-72 sm:h-72 flex items-center justify-center bg-slate-950 rounded border border-emerald-500/40 overflow-hidden">
+              <div class="screen-glare"></div>
+              <canvas id="canvas-workstation" class="w-full h-full object-contain cursor-crosshair"></canvas>
+            </div>
+          </div>
+
+          <div class="shell-hardware-el w-full mt-2 sm:mt-3 flex items-center justify-between px-2 sm:px-3 font-code">
+            <div class="flex items-center space-x-2">
+              <span class="text-[10px] sm:text-xs font-bold text-slate-300 tracking-widest">WORKSTATION 1600</span>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3">
+              <div class="rotary-dial" title="Brightness"></div>
+              <div class="rotary-dial" title="Contrast"></div>
+              <button onclick="app.toggleAudio()" class="w-5 h-5 rounded-full bg-emerald-500 border border-emerald-700 shadow-md flex items-center justify-center text-[8px] text-slate-950 font-bold tactile-btn">
+                <i class="fa-solid fa-power-off"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="shell-hardware-el stand-neck"></div>
+        <div class="shell-hardware-el stand-base"></div>
+
+        <div class="shell-hardware-el workstation-dock mt-2 w-full max-w-md bg-slate-900 border border-slate-700 p-2 sm:p-2.5 rounded-xl flex items-center justify-between shadow-xl font-code">
+          <div class="flex space-x-1.5">
+            <button onclick="app.setTool('pencil')" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-emerald-400 text-xs font-bold hover:bg-slate-700">DRAW</button>
+            <button onclick="app.setTool('bucket')" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-emerald-400 text-xs font-bold hover:bg-slate-700">FILL</button>
+            <button onclick="app.clearCanvas()" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-rose-400 text-xs font-bold hover:bg-slate-700">CLR</button>
+          </div>
+          <button onclick="app.openSouvenirModal()" class="px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 shadow">
+            EXPORT
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Dock Below Frame -->
+      <div class="mt-4 sm:mt-5 flex flex-wrap items-center justify-center gap-2 sm:gap-3 z-10 action-dock">
+        <button onclick="app.startReplay()" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-black/70 border border-indigo-500/40 text-indigo-300 hover:text-white hover:bg-black/90 text-xs font-medium shadow-lg transition flex items-center space-x-1.5 sm:space-x-2 backdrop-blur-md">
+          <i class="fa-solid fa-play text-indigo-400"></i>
+          <span>Replay Time-Lapse</span>
+        </button>
+
+        <button onclick="app.openSouvenirModal()" class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-gradient-to-r from-lime-500 via-emerald-400 to-cyan-500 text-slate-950 text-xs font-bold shadow-lg hover:brightness-110 transition flex items-center space-x-1.5 sm:space-x-2">
+          <i class="fa-solid fa-stamp"></i>
+          <span>SOUVENIR CARD</span>
+        </button>
+      </div>
+
+      <!-- Live Status Bar -->
+      <div class="absolute bottom-2 left-4 right-4 hidden sm:flex items-center justify-between text-[11px] font-mono opacity-60 pointer-events-none status-bar-el">
+        <div id="status-coords">X: 0, Y: 0</div>
+        <div id="status-pixels">Active Pixels: 0</div>
+        <div id="status-entropy">Entropy: 0.00 bits</div>
+        <div id="status-fps">FPS: 60</div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- MODALS -->
+  <div id="modal-builders-byte" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-indigo-500/40 p-5 sm:p-6 md:p-8 shadow-2xl relative">
+      <button onclick="app.closeModal('modal-builders-byte')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="space-y-4">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-mono">
+          <i class="fa-solid fa-terminal"></i>
+          <span>Builder's Byte</span>
+        </div>
+
+        <h2 class="text-xl md:text-2xl font-bold tracking-tight">Tactile Retro Hardware Sandbox</h2>
+
+        <div class="text-xs md:text-sm space-y-3 leading-relaxed opacity-90">
+          <p>
+            Welcome to <strong>Bytes on Canvas</strong>. Pixel artwork belongs inside physical hardware displays—not floating on flat, sterile modern web pages.
+          </p>
+          <p>
+            Each theme transforms your entire workspace—from fonts and buttons to background lighting and audio synthesis. Switch seamlessly between <strong>Midnight Studio</strong>, <strong>Game Boy Color-Style</strong>, <strong>14" CRT Phillips-Style</strong>, and <strong>16" Workstation CRT</strong>.
+          </p>
+          <p class="p-3 bg-black/60 rounded-xl border border-white/10 text-xs opacity-80 italic font-mono">
+            "Toggle Focus Mode for uncluttered drawing, or turn on Sandbox Mode to watch sand gravity and heat diffusion take over."
+          </p>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <button onclick="app.closeModal('modal-builders-byte')" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-500 transition">
+            Start Creating
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-souvenir" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+    <div class="glass-panel w-full max-w-xl rounded-2xl border border-lime-500/40 p-5 sm:p-6 shadow-2xl relative my-auto">
+      <button onclick="app.closeModal('modal-souvenir')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-slate-400 hover:text-white flex items-center justify-center text-xs z-10">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center mb-4">
+        <h3 class="text-lg md:text-xl font-bold">Builder's Byte Souvenir Card</h3>
+        <p class="text-xs font-mono opacity-70">Hardware Collectible & Metadata Stamp</p>
+      </div>
+
+      <div id="souvenir-card-container" class="bg-slate-950 border border-lime-500/30 rounded-xl p-4 sm:p-5 shadow-2xl space-y-3 sm:space-y-4">
+        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 rounded-full bg-lime-400"></div>
+            <span class="text-xs font-mono font-bold tracking-wider" id="souvenir-card-title">BYTES ON CANVAS • MIDNIGHT STUDIO</span>
+          </div>
+          <span id="souvenir-timestamp" class="text-[10px] font-mono opacity-60">2026.10.29</span>
+        </div>
+
+        <div class="flex justify-center my-2">
+          <div class="p-3 bg-slate-900 border border-white/10 rounded-xl shadow-inner">
+            <img id="souvenir-preview-img" class="w-36 h-36 sm:w-44 sm:h-44 object-contain rounded-lg border border-white/10" alt="Canvas Souvenir Artwork" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left font-mono">
+          <div class="p-2 bg-slate-900/90 rounded-lg border border-white/10">
+            <div class="text-[9px] opacity-60 uppercase">Hardware Theme</div>
+            <div id="souvenir-housing" class="text-xs font-bold text-lime-300">Midnight Studio</div>
+          </div>
+          <div class="p-2 bg-slate-900/90 rounded-lg border border-white/10">
+            <div class="text-[9px] opacity-60 uppercase">Active Pixels</div>
+            <div id="souvenir-pixels" class="text-xs font-bold text-cyan-300">0</div>
+          </div>
+          <div class="p-2 bg-slate-900/90 rounded-lg border border-white/10">
+            <div class="text-[9px] opacity-60 uppercase">Entropy Score</div>
+            <div id="souvenir-entropy" class="text-xs font-bold text-amber-300">0.00 bits</div>
+          </div>
+          <div class="p-2 bg-slate-900/90 rounded-lg border border-white/10">
+            <div class="text-[9px] opacity-60 uppercase">Grid Resolution</div>
+            <div id="souvenir-res" class="text-xs font-bold">32 x 32</div>
+          </div>
+          <div class="p-2 bg-slate-900/90 rounded-lg border border-white/10">
+            <div class="text-[9px] opacity-60 uppercase">Dominant Hue</div>
+            <div id="souvenir-dominant" class="text-xs font-bold flex items-center space-x-1">
+              <span id="souvenir-dominant-swatch" class="w-2.5 h-2.5 rounded-full inline-block bg-indigo-500"></span>
+              <span id="souvenir-dominant-hex">#6366F1</span>
+            </div>
+          </div>
+          <div class="p-2 bg-slate-900/90 rounded-lg border border-white/10">
+            <div class="text-[9px] opacity-60 uppercase">Verification</div>
+            <div class="text-[10px] opacity-70 truncate">#BYTE-2026-OK</div>
+          </div>
+        </div>
+
+        <div class="pt-2 text-[10px] font-mono text-center opacity-60 border-t border-white/10">
+          Generated via Builder's Byte Engine • Pure Client-Side Hardware Collectible
+        </div>
+      </div>
+
+      <div class="mt-4 sm:mt-5 flex items-center justify-end space-x-3">
+        <button onclick="app.closeModal('modal-souvenir')" class="px-4 py-2 rounded-xl bg-black/60 border border-white/20 text-xs font-medium">
+          Close
+        </button>
+        <button onclick="app.downloadSouvenirCard()" class="px-5 py-2 rounded-xl bg-lime-500 hover:bg-lime-400 text-slate-950 font-bold text-xs shadow-lg transition flex items-center space-x-2">
+          <i class="fa-solid fa-download"></i>
+          <span>Download PNG Card</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-devtools" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-emerald-500/40 p-5 sm:p-6 shadow-2xl relative">
+      <button onclick="app.closeModal('modal-devtools')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="space-y-4">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-mono">
+          <i class="fa-solid fa-code"></i>
+          <span>Developer Tools</span>
+        </div>
+
+        <h3 class="text-xl font-bold">Export Code Matrix & Sprites</h3>
+        <p class="text-xs opacity-75 leading-relaxed">
+          Convert your current pixel grid into developer-ready 2D JSON arrays or scaled PNG sprites for game engines.
+        </p>
+
+        <div class="space-y-3 pt-2">
+          <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold font-mono text-emerald-400">2D Matrix JSON Array</span>
+              <span class="text-[10px] font-mono opacity-60">[[color,...],...]</span>
+            </div>
+            <div class="flex space-x-2">
+              <button onclick="app.copyMatrixJSON()" class="flex-1 px-3 py-1.5 rounded-lg bg-black/40 border border-white/20 hover:bg-white/10 text-xs font-mono transition flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-copy"></i>
+                <span id="label-copy-json">Copy JSON</span>
+              </button>
+              <button onclick="app.downloadMatrixJSON()" class="flex-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono transition flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-file-arrow-down"></i>
+                <span>Download .JSON</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3 bg-black/60 rounded-xl border border-white/10 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold font-mono text-cyan-400">Scaled Sprite PNG</span>
+              <div class="flex items-center space-x-1 text-[11px] font-mono">
+                <span>Scale:</span>
+                <select id="select-sprite-scale" class="bg-black/60 border border-white/20 rounded px-1 text-xs">
+                  <option value="1">1x (Native)</option>
+                  <option value="4">4x (128px)</option>
+                  <option value="8" selected>8x (256px)</option>
+                  <option value="16">16x (512px)</option>
+                </select>
+              </div>
+            </div>
+            <button onclick="app.downloadSpritePNG()" class="w-full px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-mono transition flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-image"></i>
+              <span>Export Clean Sprite PNG</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <button onclick="app.closeModal('modal-devtools')" class="px-4 py-2 rounded-xl bg-black/60 border border-white/20 text-xs font-medium">
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay-replay" class="fixed inset-x-0 top-20 z-40 flex justify-center pointer-events-none hidden">
+    <div class="glass-panel px-6 py-2.5 rounded-full border border-indigo-500/40 text-indigo-300 text-xs font-mono shadow-2xl flex items-center space-x-3 pointer-events-auto">
+      <div class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></div>
+      <span>Replaying Time-Lapse...</span>
+      <button onclick="app.stopReplay()" class="ml-2 px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/40 text-[10px]">Stop</button>
+    </div>
+  </div>
+
+  <canvas id="offscreen-card-canvas" width="600" height="750" class="hidden"></canvas>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
