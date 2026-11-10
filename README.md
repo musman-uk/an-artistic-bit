@@ -1,6 +1,6 @@
-# 🎨 Bytes on Canvas
+# 🎨 Bytes On Canvas
 
-This repository contains [Bytes on Canvas](https://musman-uk.github.io/bytes-on-canvas/) - an interactive retro hardware pixel studio and physics sandbox web application featuring physical display themes, Web Audio sound synthesis, granular physics, and souvenir card exports built with Parcel and Tailwind CSS.
+This repository contains [Bytes On Canvas](https://musman-uk.github.io/bytes-on-canvas/) - an interactive retro hardware pixel studio and physics sandbox web application featuring physical display themes, Web Audio sound synthesis, granular physics, and souvenir card exports built with Parcel and Tailwind CSS.
 
 ---
 
