@@ -1,6 +1,6 @@
-# 🟦 Bytes On Canvas
+# 🟦 An Artistic Bit
 
-This repository contains [Bytes On Canvas](https://musman-uk.github.io/bytes-on-canvas/) - an interactive retro hardware pixel studio and physics sandbox web application featuring physical display themes, Web Audio sound synthesis, granular physics, and souvenir card exports built with Parcel and Tailwind CSS.
+This repository contains [An Artistic Bit](https://musman-uk.github.io/an-artistic-bit/) - an interactive retro hardware pixel studio and physics sandbox web application featuring physical display themes, Web Audio sound synthesis, granular physics, and souvenir card exports built with Parcel and Tailwind CSS.
 
 ---
 
@@ -44,4 +44,3 @@ Version `0.0.0` – Unpublished
 
 <sub>© Mohammed Usman</sub>
 
-<sub>All rights reserved. No commercial use, redistribution, or derivatives.</sub>
