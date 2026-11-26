@@ -1,0 +1,13 @@
+{
+  "terminal.integrated.profiles.windows": {
+    "PowerShell (Node 24)": {
+      "source": "PowerShell",
+      "args": [
+        "-NoExit",
+        "-Command",
+        "fnm env --shell powershell | Out-String | Invoke-Expression; fnm use 24"
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "PowerShell (Node 24)"
+}
