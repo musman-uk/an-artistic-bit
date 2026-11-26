@@ -53,7 +53,7 @@ export class Exporter {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `canvas-matrix-${Date.now()}.json`;
+    a.download = `an-artistic-bit-matrix-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -77,11 +77,11 @@ export class Exporter {
 
     const a = document.createElement('a');
     a.href = exportCanvas.toDataURL('image/png');
-    a.download = `pixel-sprite-${gridSize}x${gridSize}-${Date.now()}.png`;
+    a.download = `an-artistic-bit-sprite-${gridSize}x${gridSize}-${Date.now()}.png`;
     a.click();
   }
 
-  static renderSouvenirCard(sourceCanvas, housingTitle, activePixels, entropy, gridSize) {
+  static renderSouvenirCard(sourceCanvas, housingTitle, activePixels, entropy, gridSize, showGridlines = true) {
     const offCanvas = document.createElement('canvas');
     offCanvas.width = 600;
     offCanvas.height = 720;
@@ -89,52 +89,49 @@ export class Exporter {
     const w = offCanvas.width;
     const h = offCanvas.height;
 
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#090d16');
-    grad.addColorStop(0.5, '#020617');
-    grad.addColorStop(1, '#0f172a');
-    ctx.fillStyle = grad;
+    ctx.fillStyle = '#0e1117';
     ctx.fillRect(0, 0, w, h);
 
-    ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 3;
     ctx.strokeRect(20, 20, w - 40, h - 40);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px "Space Grotesk", sans-serif';
-    ctx.fillText('BYTES ON CANVAS', 40, 65);
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 24px "Fraunces", "Space Grotesk", serif';
+    ctx.fillText('AN ARTISTIC BIT', 40, 65);
 
-    ctx.fillStyle = '#a855f7';
-    ctx.font = '13px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '13px "Fira Code", monospace';
     ctx.fillText(`HARDWARE THEME : ${housingTitle.toUpperCase()}`, 40, 92);
 
     const size = 360;
     const x = (w - size) / 2;
     const y = 120;
 
-    ctx.fillStyle = '#020617';
+    ctx.fillStyle = '#090d16';
     ctx.fillRect(x - 10, y - 10, size + 20, size + 20);
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 2;
     ctx.strokeRect(x - 10, y - 10, size + 20, size + 20);
 
-    // Draw source canvas directly without HTMLImageElement overhead
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(sourceCanvas, x, y, size, size);
 
-    ctx.fillStyle = '#a3e635';
-    ctx.font = '14px "JetBrains Mono", monospace';
-    ctx.fillText(`ACTIVE PIXELS : ${activePixels}`, 50, 530);
-    ctx.fillText(`ENTROPY SCORE : ${entropy.toFixed(2)} bits`, 50, 560);
-    ctx.fillText(`GRID RESOLUTION: ${gridSize} x ${gridSize}`, 50, 590);
-    ctx.fillText(`TIMESTAMP     : ${new Date().toISOString().slice(0, 10)}`, 50, 620);
+    const resLabel = showGridlines ? `${gridSize} x ${gridSize} GRID` : `FREEHAND (${gridSize}x${gridSize})`;
 
-    ctx.fillStyle = '#06b6d4';
-    ctx.font = 'bold 12px "JetBrains Mono", monospace';
-    ctx.fillText("• BUILDER'S BYTE CERTIFIED HARDWARE ARTIFACT •", 110, 690);
+    ctx.fillStyle = '#a3e635';
+    ctx.font = '14px "Fira Code", monospace';
+    ctx.fillText(`ACTIVE PIXELS  : ${activePixels}`, 50, 530);
+    ctx.fillText(`ENTROPY SCORE  : ${entropy.toFixed(2)} bits`, 50, 560);
+    ctx.fillText(`CANVAS MODE    : ${resLabel}`, 50, 590);
+    ctx.fillText(`TIMESTAMP      : ${new Date().toISOString().slice(0, 10)}`, 50, 620);
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 12px "Fira Code", monospace';
+    ctx.fillText("• BUILDER'S BYTE CERTIFIED HARDWARE ARTIFACT •", 105, 690);
 
     const a = document.createElement('a');
-    a.download = `Bytes-On-Canvas-Souvenir-${Date.now()}.png`;
+    a.download = `An-Artistic-Bit-Souvenir-${Date.now()}.png`;
     a.href = offCanvas.toDataURL('image/png');
     a.click();
   }
