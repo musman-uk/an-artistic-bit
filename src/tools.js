@@ -24,7 +24,22 @@ export class DrawingTools {
     uniqueTargets.forEach(pt => state.setPixel(pt.x, pt.y, color));
   }
 
-  static drawLine(x0, y0, x1, y1, color, state) {
+  static stampNib(cx, cy, color, radius, state) {
+    if (radius <= 0) {
+      DrawingTools.applyPixelWithSymmetry(cx, cy, color, state);
+      return;
+    }
+
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        if (dx * dx + dy * dy <= radius * radius + 0.5) {
+          DrawingTools.applyPixelWithSymmetry(cx + dx, cy + dy, color, state);
+        }
+      }
+    }
+  }
+
+  static drawLine(x0, y0, x1, y1, color, state, radius = 0) {
     let currX = x0;
     let currY = y0;
     const dx = Math.abs(x1 - currX);
@@ -33,10 +48,10 @@ export class DrawingTools {
     const sy = (currY < y1) ? 1 : -1;
     let err = dx - dy;
 
-    let maxSteps = state.gridSize * 2; // Infinite loop safety bound
+    let maxSteps = state.gridSize * 3; // Infinite loop safety bound
 
     while (maxSteps > 0) {
-      DrawingTools.applyPixelWithSymmetry(currX, currY, color, state);
+      DrawingTools.stampNib(currX, currY, color, radius, state);
       if (currX === x1 && currY === y1) break;
 
       const e2 = 2 * err;
@@ -58,17 +73,18 @@ export class DrawingTools {
     const startColor = state.grid[startY][startX];
     if (startColor === targetColor) return;
 
-    // BFS queue for predictable memory usage
+    // Index-pointer BFS queue for fast O(n) execution even in 256x256 freehand mode
     const queue = [{ x: startX, y: startY }];
-    const visited = new Set();
+    const visited = new Uint8Array(state.gridSize * state.gridSize);
+    let head = 0;
 
-    while (queue.length > 0) {
-      const { x, y } = queue.shift();
-      const key = `${x},${y}`;
+    while (head < queue.length) {
+      const { x, y } = queue[head++];
 
       if (x < 0 || x >= state.gridSize || y < 0 || y >= state.gridSize) continue;
-      if (visited.has(key)) continue;
-      visited.add(key);
+      const flatIdx = y * state.gridSize + x;
+      if (visited[flatIdx]) continue;
+      visited[flatIdx] = 1;
 
       if (state.grid[y][x] === startColor) {
         DrawingTools.applyPixelWithSymmetry(x, y, targetColor, state);

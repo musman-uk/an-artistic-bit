@@ -58,7 +58,7 @@ export class PhysicsEngine {
   }
 
   static updateGlitch(state) {
-    const count = Math.max(2, Math.floor(state.gridSize / 8));
+    const count = Math.max(2, Math.floor((state.gridSize * state.gridSize) / 220));
     for (let i = 0; i < count; i++) {
       const rx = Math.floor(Math.random() * state.gridSize);
       const ry = Math.floor(Math.random() * state.gridSize);
@@ -69,19 +69,35 @@ export class PhysicsEngine {
   }
 
   static updateBleed(state) {
-    const count = Math.max(1, Math.floor(state.gridSize / 16));
-    for (let i = 0; i < count; i++) {
+    const directions = [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0]
+    ];
+    const attempts = Math.max(2, Math.floor((state.gridSize * state.gridSize) / 360));
+
+    for (let i = 0; i < attempts; i++) {
       const rx = Math.floor(Math.random() * state.gridSize);
-      const ry = Math.floor(Math.random() * (state.gridSize - 1));
-      if (state.grid[ry][rx] && !state.grid[ry + 1][rx]) {
-        state.grid[ry + 1][rx] = state.grid[ry][rx];
+      const ry = Math.floor(Math.random() * state.gridSize);
+      const color = state.grid[ry][rx];
+      if (!color) continue;
+
+      const [dx, dy] = directions[Math.floor(Math.random() * directions.length)];
+      const nx = rx + dx;
+      const ny = ry + dy;
+
+      if (nx >= 0 && nx < state.gridSize && ny >= 0 && ny < state.gridSize && !state.grid[ny][nx]) {
+        state.grid[ny][nx] = color;
       }
     }
   }
 
   static triggerEnergyWave(centerX, centerY, state) {
     const waveColor = state.currentColor;
-    let radius = 1;
+    const step = Math.max(1.5, state.gridSize / 22);
+    const bandWidth = Math.max(0.8, state.gridSize / 40);
+    let radius = step;
 
     if (!state.activeTimers) state.activeTimers = [];
 
@@ -96,12 +112,12 @@ export class PhysicsEngine {
       for (let y = 0; y < state.gridSize; y++) {
         for (let x = 0; x < state.gridSize; x++) {
           const dist = Math.hypot(x - centerX, y - centerY);
-          if (Math.abs(dist - radius) < 0.8) {
+          if (Math.abs(dist - radius) < bandWidth) {
             state.grid[y][x] = waveColor;
           }
         }
       }
-      radius += 1.5;
+      radius += step;
     }, 45);
 
     state.activeTimers.push(interval);
