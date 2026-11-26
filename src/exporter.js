@@ -81,7 +81,7 @@ export class Exporter {
     a.click();
   }
 
-  static renderSouvenirCard(sourceCanvas, housingTitle, activePixels, entropy, gridSize, showGridlines = true) {
+  static renderSouvenirCard(sourceCanvas, housingTitle, activePixels, entropy, gridSize, showGridlines = true, activeTheme = 'night') {
     const offCanvas = document.createElement('canvas');
     offCanvas.width = 600;
     offCanvas.height = 720;
@@ -108,7 +108,7 @@ export class Exporter {
     const x = (w - size) / 2;
     const y = 120;
 
-    ctx.fillStyle = '#090d16';
+    ctx.fillStyle = activeTheme === 'day' ? '#faf8f5' : '#090d16';
     ctx.fillRect(x - 10, y - 10, size + 20, size + 20);
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 2;
@@ -128,7 +128,7 @@ export class Exporter {
 
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 12px "Fira Code", monospace';
-    ctx.fillText("• BUILDER'S BYTE CERTIFIED HARDWARE ARTIFACT •", 105, 690);
+    ctx.fillText('• AN ARTISTIC BIT • HARDWARE ARTIFACT •', 148, 690);
 
     const a = document.createElement('a');
     a.download = `An-Artistic-Bit-Souvenir-${Date.now()}.png`;

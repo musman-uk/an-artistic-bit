@@ -1,7 +1,7 @@
 {
   "name": "an-artistic-bit",
   "version": "1.0.0",
-  "description": "Tactile Retro Hardware Sandbox & Pixel Canvas Engine",
+  "description": "Retro Display Pixel Studio & Physics Sandbox",
   "source": "src/index.html",
   "type": "module",
   "scripts": {
