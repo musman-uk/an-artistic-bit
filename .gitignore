@@ -8,6 +8,7 @@ dist/
 # OS / Environment files
 .DS_Store
 Thumbs.db
+.vscode/*
 .env
 .env.local
 
