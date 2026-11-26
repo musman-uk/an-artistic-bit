@@ -14,7 +14,9 @@ export class AppState {
     this.showGridlines = true;
     this.crtEnabled = false;
     this.audioEnabled = true;
-    this.activeTheme = 'midnight'; // 'midnight' | 'gbc' | 'tv' | 'workstation'
+    this.activeTheme = 'night'; // 'night' | 'day' | 'gbc' | 'tv' | 'lenovo' | 'psp'
+    this.activePalette = 'night';
+    this.hasCustomTheme = false;
     this.focusMode = false;
 
     this.grid = [];
@@ -43,14 +45,12 @@ export class AppState {
   resizeGrid(newSize) {
     if (this.gridSize === newSize) return;
 
-    // Save current canvas to undo stack before resizing
     this.saveUndoState();
 
     const oldSize = this.gridSize;
     const oldGrid = this.grid;
     const newGrid = Array(newSize).fill(null).map(() => Array(newSize).fill(null));
 
-    // Nearest-neighbor resampling to scale pixels to the new resolution
     for (let newY = 0; newY < newSize; newY++) {
       for (let newX = 0; newX < newSize; newX++) {
         const oldX = Math.floor((newX / newSize) * oldSize);
@@ -121,6 +121,8 @@ export class AppState {
         lastGridResolution: this.lastGridResolution,
         showGridlines: this.showGridlines,
         activeTheme: this.activeTheme,
+        activePalette: this.activePalette,
+        hasCustomTheme: this.hasCustomTheme,
         currentColor: this.currentColor,
         symmetryMode: this.symmetryMode,
         crtEnabled: this.crtEnabled,
@@ -147,7 +149,21 @@ export class AppState {
       this.gridSize = data.gridSize;
       this.lastGridResolution = [16, 32, 48].includes(data.lastGridResolution) ? data.lastGridResolution : 32;
       this.showGridlines = typeof data.showGridlines === 'boolean' ? data.showGridlines : true;
-      this.activeTheme = data.activeTheme || 'midnight';
+
+      let resolvedTheme = data.activeTheme || 'night';
+      if (resolvedTheme === 'midnight') resolvedTheme = 'night';
+      if (resolvedTheme === 'workstation') resolvedTheme = 'lenovo';
+      this.activeTheme = resolvedTheme;
+
+      let resolvedPalette = data.activePalette || this.activeTheme;
+      if (resolvedPalette === 'midnight') resolvedPalette = 'night';
+      this.activePalette = resolvedPalette;
+
+      const legacyHardwareTheme = ['gbc', 'tv', 'lenovo', 'psp', 'workstation'].includes(data.activeTheme);
+      this.hasCustomTheme = typeof data.hasCustomTheme === 'boolean'
+        ? data.hasCustomTheme
+        : legacyHardwareTheme;
+
       this.currentColor = data.currentColor || '#6366f1';
       this.symmetryMode = data.symmetryMode || 'off';
       this.crtEnabled = Boolean(data.crtEnabled);

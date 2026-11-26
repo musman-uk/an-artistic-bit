@@ -37,18 +37,19 @@ export class SynthAudio {
     // Set waveform timbre based on active hardware theme
     if (activeTheme === 'gbc') {
       osc.type = 'square';
-    } else if (activeTheme === 'tv') {
+    } else if (activeTheme === 'tv' || activeTheme === 'psp') {
       osc.type = 'sine';
-    } else if (activeTheme === 'workstation') {
-      osc.type = 'sawtooth';
+    } else if (activeTheme === 'lenovo') {
+      osc.type = 'triangle';
     } else {
       osc.type = 'triangle';
     }
 
     if (type === 'paint') {
-      const freq = freqOverride || (280 + Math.random() * 260);
+      const base = activeTheme === 'psp' ? 420 : activeTheme === 'lenovo' ? 320 : 280;
+      const freq = freqOverride || (base + Math.random() * 240);
       osc.frequency.setValueAtTime(freq, now);
-      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.setValueAtTime(activeTheme === 'lenovo' ? 0.04 : 0.05, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
       osc.start(now);
       osc.stop(now + 0.05);

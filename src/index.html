@@ -11,7 +11,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fira+Code:wght@400;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
 
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -23,10 +23,10 @@
           fontFamily: {
             sans: ['Space Grotesk', 'Inter', 'sans-serif'],
             serif: ['Fraunces', 'Georgia', 'serif'],
+            signature: ['Caveat', 'cursive'],
             pixel: ['"Press Start 2P"', 'monospace'],
             osd: ['VT323', 'monospace'],
-            code: ['"Fira Code"', 'monospace'],
-            inter: ['Inter', 'sans-serif']
+            code: ['"Fira Code"', 'monospace']
           }
         }
       }
@@ -36,12 +36,12 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 
-<body class="theme-midnight h-full flex flex-col antialiased overflow-hidden transition-colors duration-300">
+<body class="theme-night h-full flex flex-col antialiased overflow-hidden transition-colors duration-300">
 
   <!-- HEADER TOOLBAR -->
-  <header class="h-16 shrink-0 border-b px-3 md:px-6 flex items-center justify-between studio-panel z-30">
-    <div class="flex items-center space-x-3">
-      <div class="studio-emblem w-9 h-9 rounded-lg grid grid-cols-2 gap-0.5 p-1.5" aria-hidden="true">
+  <header class="min-h-16 h-auto py-2 lg:h-16 lg:py-0 shrink-0 border-b px-3 lg:px-6 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 studio-panel z-30">
+    <div class="flex items-center space-x-2.5 sm:space-x-3">
+      <div class="studio-emblem w-8 h-8 sm:w-9 sm:h-9 rounded-lg grid grid-cols-2 gap-0.5 p-1.5" aria-hidden="true">
         <span class="rounded-[2px] emblem-cell-a"></span>
         <span class="rounded-[2px] emblem-cell-b"></span>
         <span class="rounded-[2px] emblem-cell-b"></span>
@@ -49,7 +49,6 @@
       </div>
       <div>
         <h1 class="text-base md:text-lg font-bold tracking-tight theme-header-title leading-none">An Artistic Bit</h1>
-        <p class="text-[10px] font-code opacity-65 hidden sm:block mt-0.5">Tactile Retro Hardware Sandbox</p>
       </div>
     </div>
 
@@ -66,38 +65,43 @@
     </div>
 
     <!-- Controls -->
-    <div class="flex items-center space-x-1.5 sm:space-x-2">
-      <select id="select-theme" onchange="app.setTheme(this.value)" class="studio-control text-xs rounded-lg px-2.5 py-1.5 cursor-pointer focus:outline-none">
-        <option value="midnight">Midnight Studio</option>
-        <option value="gbc">Game Boy Color-Style</option>
-        <option value="tv">14" CRT Phillips-Style</option>
-        <option value="workstation">16" Workstation CRT</option>
-      </select>
+    <div class="w-full lg:w-auto flex flex-wrap items-center justify-between lg:justify-end gap-1.5 sm:gap-2">
+      <div class="flex items-center space-x-1.5 studio-well px-2 py-1 rounded-lg">
+        <label for="select-theme" class="text-[10px] font-code uppercase tracking-wider opacity-65">Theme</label>
+        <select id="select-theme" onchange="app.setTheme(this.value)" class="studio-control text-xs rounded-md px-2 py-1 cursor-pointer focus:outline-none max-w-[140px] sm:max-w-none">
+          <option value="night">Night Studio</option>
+          <option value="day">Day Studio</option>
+          <option value="gbc">Game Boy Color-Style</option>
+          <option value="tv">14" CRT Philips-Style</option>
+          <option value="lenovo">11" Lenovo-Style</option>
+          <option value="psp">PSP-Style</option>
+        </select>
+      </div>
 
-      <button id="btn-focus-toggle" onclick="app.toggleFocusMode()" class="px-2.5 py-1.5 rounded-lg studio-control text-xs font-code flex items-center space-x-1.5" title="Toggle Focus Mode">
-        <i class="fa-solid fa-expand text-amber-400"></i>
-        <span class="hidden lg:inline" id="label-focus">Focus View</span>
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button id="btn-focus-toggle" onclick="app.toggleFocusMode()" class="w-8 h-8 rounded-lg studio-control text-xs flex items-center justify-center" title="Switch to Focus View" aria-label="Toggle Focus View">
+          <i id="icon-focus" class="fa-solid fa-expand text-amber-500"></i>
+        </button>
 
-      <button id="btn-toggle-audio" onclick="app.toggleAudio()" class="p-2 rounded-lg studio-control text-xs" title="Toggle Synth Audio">
-        <i id="icon-audio" class="fa-solid fa-volume-high text-lime-400"></i>
-      </button>
+        <button id="btn-toggle-audio" onclick="app.toggleAudio()" class="w-8 h-8 rounded-lg studio-control text-xs flex items-center justify-center" title="Toggle Synth Audio" aria-label="Toggle Synth Audio">
+          <i id="icon-audio" class="fa-solid fa-volume-high text-emerald-500"></i>
+        </button>
 
-      <button id="btn-toggle-crt" onclick="app.toggleCRT()" class="p-2 rounded-lg studio-control text-xs" title="Toggle CRT Scanlines">
-        <i class="fa-solid fa-tv text-cyan-400"></i>
-      </button>
+        <button id="btn-toggle-crt" onclick="app.toggleCRT()" class="w-8 h-8 rounded-lg studio-control text-xs flex items-center justify-center" title="Toggle CRT Scanlines" aria-label="Toggle CRT Scanlines">
+          <i class="fa-solid fa-tv text-sky-500"></i>
+        </button>
 
-      <div class="h-5 w-px bg-white/10 hidden sm:block mx-0.5"></div>
+        <button onclick="app.openDevToolsModal()" class="w-8 h-8 rounded-lg studio-control text-xs flex items-center justify-center" title="Developer Tools" aria-label="Developer Tools">
+          <i class="fa-solid fa-code text-emerald-500"></i>
+        </button>
 
-      <button onclick="app.openModal('modal-devtools')" class="p-2 sm:px-2.5 sm:py-1.5 rounded-lg studio-control text-xs font-code flex items-center space-x-1.5" title="Developer Utilities">
-        <i class="fa-solid fa-code text-emerald-400"></i>
-        <span class="hidden xl:inline">Dev Tools</span>
-      </button>
+        <div class="h-5 border-l studio-divider mx-0.5"></div>
 
-      <button onclick="app.openModal('modal-builders-byte')" class="px-2.5 py-1.5 rounded-lg studio-control text-xs font-medium flex items-center space-x-1.5" title="About An Artistic Bit">
-        <i class="fa-solid fa-feather-pointed opacity-80"></i>
-        <span class="hidden sm:inline">Builder's Byte</span>
-      </button>
+        <button onclick="app.openModal('modal-builders-byte')" class="h-8 px-2.5 sm:px-3 rounded-lg studio-control text-xs font-medium flex items-center space-x-1.5 shrink-0" title="About An Artistic Bit">
+          <i class="fa-solid fa-microchip opacity-80"></i>
+          <span>Builder's Byte</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -156,7 +160,7 @@
 
           <div class="space-y-2">
             <button onclick="app.setBehavior('sand')" id="behavior-sand" class="behavior-btn studio-behavior-active w-full p-2.5 rounded-lg studio-well text-left transition flex items-start space-x-3">
-              <div class="p-2 rounded bg-amber-500/15 text-amber-400 mt-0.5">
+              <div class="p-2 rounded bg-amber-500/15 text-amber-500 mt-0.5">
                 <i class="fa-solid fa-hourglass-half text-xs"></i>
               </div>
               <div>
@@ -166,7 +170,7 @@
             </button>
 
             <button onclick="app.setBehavior('glitch')" id="behavior-glitch" class="behavior-btn w-full p-2.5 rounded-lg studio-well text-left transition flex items-start space-x-3">
-              <div class="p-2 rounded bg-emerald-500/15 text-emerald-400 mt-0.5">
+              <div class="p-2 rounded bg-emerald-500/15 text-emerald-500 mt-0.5">
                 <i class="fa-solid fa-wave-square text-xs"></i>
               </div>
               <div>
@@ -176,7 +180,7 @@
             </button>
 
             <button onclick="app.setBehavior('bleed')" id="behavior-bleed" class="behavior-btn w-full p-2.5 rounded-lg studio-well text-left transition flex items-start space-x-3">
-              <div class="p-2 rounded bg-rose-500/15 text-rose-400 mt-0.5">
+              <div class="p-2 rounded bg-rose-500/15 text-rose-500 mt-0.5">
                 <i class="fa-solid fa-fire-flame-curved text-xs"></i>
               </div>
               <div>
@@ -186,7 +190,7 @@
             </button>
 
             <button onclick="app.setBehavior('wave')" id="behavior-wave" class="behavior-btn w-full p-2.5 rounded-lg studio-well text-left transition flex items-start space-x-3">
-              <div class="p-2 rounded bg-cyan-500/15 text-cyan-400 mt-0.5">
+              <div class="p-2 rounded bg-cyan-500/15 text-cyan-500 mt-0.5">
                 <i class="fa-solid fa-water text-xs"></i>
               </div>
               <div>
@@ -200,9 +204,9 @@
         <div class="studio-well p-3 rounded-lg">
           <div class="flex justify-between items-center mb-1.5">
             <label class="text-[10px] font-code opacity-70">Sim Speed</label>
-            <span id="label-sim-speed" class="text-xs font-code text-lime-400">1.0x</span>
+            <span id="label-sim-speed" class="text-xs font-code font-semibold studio-accent-text">1.0x</span>
           </div>
-          <input type="range" min="0.2" max="3" step="0.2" value="1" oninput="app.setSimSpeed(this.value)" class="w-full accent-lime-400 cursor-pointer" />
+          <input type="range" min="0.2" max="3" step="0.2" value="1" oninput="app.setSimSpeed(this.value)" class="w-full studio-range cursor-pointer" />
         </div>
       </div>
 
@@ -211,9 +215,12 @@
         <div class="flex justify-between items-center">
           <label class="text-[10px] font-code uppercase tracking-wider opacity-65">Palette Swatches</label>
           <select id="select-preset-palette" onchange="app.loadPalettePreset(this.value)" class="studio-control text-[10px] rounded px-2 py-0.5 focus:outline-none">
-            <option value="midnight">Midnight Neon</option>
+            <option value="night">Midnight Neon</option>
+            <option value="day">Studio Paper</option>
             <option value="gbc">GBC Olive</option>
             <option value="arcade">Arcade Classics</option>
+            <option value="office">Office Slate</option>
+            <option value="psp">Piano Gloss</option>
             <option value="pastel">Paper Pastel</option>
             <option value="monochrome">Phosphor Matrix</option>
           </select>
@@ -233,10 +240,7 @@
       <!-- CANVAS UTILITIES -->
       <div class="mt-auto p-3 sm:p-4 border-t studio-divider space-y-2.5">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-1.5">
-            <label class="text-[10px] font-code opacity-70">Grid Size</label>
-            <span id="freehand-res-badge" class="hidden text-[9px] font-code px-1.5 py-0.2 rounded studio-chip-active">FREE</span>
-          </div>
+          <label class="text-[10px] font-code opacity-70">Grid Size</label>
           <div class="flex items-center space-x-1">
             <button onclick="app.setGridSize(16)" id="grid-size-16" class="px-2 py-0.5 rounded text-xs studio-well opacity-70 hover:opacity-100 transition">16x16</button>
             <button onclick="app.setGridSize(32)" id="grid-size-32" class="px-2 py-0.5 rounded text-xs studio-chip-active transition">32x32</button>
@@ -246,8 +250,8 @@
 
         <div class="flex items-center justify-between">
           <span class="text-[10px] font-code opacity-70">Gridlines</span>
-          <button id="btn-toggle-gridlines" onclick="app.toggleGridlines()" class="px-2.5 py-0.5 rounded studio-control text-xs font-code text-lime-400">
-            ON
+          <button id="btn-toggle-gridlines" onclick="app.toggleGridlines()" class="px-2.5 py-0.5 rounded studio-control text-xs font-code font-semibold studio-accent-text">
+            On
           </button>
         </div>
 
@@ -256,7 +260,7 @@
             <i class="fa-solid fa-rotate-left"></i>
             <span>Undo</span>
           </button>
-          <button onclick="app.clearCanvas()" class="px-3 py-1.5 rounded-lg bg-rose-950/50 border border-rose-500/35 text-rose-300 hover:bg-rose-900/50 text-xs font-medium transition flex items-center justify-center space-x-1.5">
+          <button onclick="app.clearCanvas()" class="px-3 py-1.5 rounded-lg studio-danger-btn text-xs font-medium transition flex items-center justify-center space-x-1.5">
             <i class="fa-solid fa-trash-can"></i>
             <span>Clear</span>
           </button>
@@ -266,15 +270,15 @@
     </aside>
 
     <!-- CENTER VIEWPORT -->
-    <section class="flex-1 min-h-[420px] sm:min-h-[500px] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 relative overflow-hidden studio-stage" id="hardware-viewport">
+    <section class="flex-1 shrink-0 md:shrink min-h-[420px] sm:min-h-[500px] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 relative overflow-hidden studio-stage" id="hardware-viewport">
       
-      <!-- THEME 1: MIDNIGHT STUDIO -->
-      <div id="shell-midnight" class="w-full max-w-[85vw] sm:max-w-md aspect-square flex flex-col items-center justify-center p-2.5 sm:p-3.5 studio-frame-midnight rounded-xl shadow-2xl relative canvas-container crt-screen-wrapper">
+      <!-- THEME 1 & 2: NIGHT STUDIO / DAY STUDIO -->
+      <div id="shell-studio" class="w-full max-w-[85vw] sm:max-w-md aspect-square flex flex-col items-center justify-center p-2.5 sm:p-3.5 studio-frame rounded-xl shadow-2xl relative canvas-container crt-screen-wrapper">
         <div class="screen-glare"></div>
-        <canvas id="canvas-midnight" class="w-full h-full object-contain cursor-crosshair rounded-lg"></canvas>
+        <canvas id="canvas-studio" class="w-full h-full object-contain cursor-crosshair rounded-lg studio-canvas-well"></canvas>
       </div>
 
-      <!-- THEME 2: GAME BOY COLOR-STYLE -->
+      <!-- THEME 3: GAME BOY COLOR-STYLE -->
       <div id="shell-gbc" class="shell-gbc p-4 sm:p-6 flex flex-col items-center justify-between relative shadow-2xl hidden max-w-[90vw] sm:max-w-[450px]">
         <div class="bezel-gbc p-3 sm:p-4 w-full flex flex-col items-center relative">
           <div class="shell-hardware-el w-full flex items-center justify-between text-[10px] font-pixel text-slate-400 mb-2 px-1">
@@ -322,7 +326,7 @@
         </div>
       </div>
 
-      <!-- THEME 3: 14" CRT PHILLIPS-STYLE -->
+      <!-- THEME 4: 14" CRT PHILIPS-STYLE -->
       <div id="shell-tv" class="shell-tv p-3 sm:p-5 flex flex-col items-center justify-between relative shadow-2xl hidden max-w-[92vw] sm:max-w-[680px]">
         <div class="shell-hardware-el w-full flex items-center justify-between px-3 pb-2 font-mono">
           <span class="font-pixel text-[10px] sm:text-xs font-bold tracking-widest text-slate-800">STUDIO MONITOR</span>
@@ -344,15 +348,15 @@
           </div>
         </div>
 
-        <div class="shell-hardware-el w-full mt-2.5 p-2 sm:p-2.5 bg-slate-300/80 rounded-2xl border border-slate-400 shadow-inner flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div class="w-20 sm:w-24 flex flex-col space-y-1 py-1 px-1 hidden sm:flex">
+        <div class="shell-hardware-el w-full mt-2.5 p-2 sm:p-2.5 bg-slate-300/80 rounded-2xl border border-slate-400 shadow-inner flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-between gap-2">
+          <div class="w-20 sm:w-24 flex-col space-y-1 py-1 px-1 hidden sm:flex">
             <div class="tv-speaker-slot"></div>
             <div class="tv-speaker-slot"></div>
             <div class="tv-speaker-slot"></div>
             <div class="tv-speaker-slot"></div>
           </div>
 
-          <div class="flex items-center space-x-1 sm:space-x-1.5 font-osd">
+          <div class="flex flex-wrap justify-center items-center gap-1 sm:gap-1.5 font-osd">
             <button onclick="app.setTool('picker')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">MENU</button>
             <button onclick="app.setTool('pencil')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">P/CH-</button>
             <button onclick="app.setTool('line')" class="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-slate-700 text-white rounded text-[10px] sm:text-[11px] font-bold border border-slate-900 shadow tactile-btn">P/CH+</button>
@@ -366,7 +370,7 @@
               <div class="rca-jack-white" title="Mono Audio Input (White)"></div>
             </div>
 
-            <div class="w-20 sm:w-24 flex flex-col space-y-1 py-1 px-1 hidden sm:flex">
+            <div class="w-20 sm:w-24 flex-col space-y-1 py-1 px-1 hidden sm:flex">
               <div class="tv-speaker-slot"></div>
               <div class="tv-speaker-slot"></div>
               <div class="tv-speaker-slot"></div>
@@ -376,48 +380,134 @@
         </div>
       </div>
 
-      <!-- THEME 4: 16" WORKSTATION CRT -->
-      <div id="shell-workstation" class="shell-workstation flex flex-col items-center relative hidden max-w-[90vw] sm:max-w-[620px]">
-        <div class="workstation-monitor p-3 sm:p-5 w-full flex flex-col items-center shadow-2xl">
-          <div class="workstation-bezel w-full p-3 sm:p-4 flex flex-col items-center">
-            <div class="shell-hardware-el w-full flex items-center justify-between text-[10px] sm:text-xs font-code text-emerald-400 mb-2 px-1">
-              <span class="font-bold">MONOCHROME TERMINAL</span>
-              <span class="text-emerald-500">75 Hz</span>
+      <!-- THEME 5: 11" LENOVO-STYLE (Office Medium Grey) -->
+      <div id="shell-lenovo" class="shell-lenovo flex flex-col items-center relative hidden max-w-[92vw] sm:max-w-[540px]">
+        <!-- Laptop Lid / Screen Assembly -->
+        <div class="lenovo-lid p-2.5 sm:p-4 w-full flex flex-col items-center shadow-2xl">
+          <div class="lenovo-bezel w-full p-2.5 sm:p-3.5 flex flex-col items-center relative">
+            <div class="shell-hardware-el w-full flex items-center justify-between text-[10px] font-code text-slate-400 mb-1.5 px-1">
+              <div class="flex items-center space-x-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-500 inline-block"></span>
+                <span class="tracking-wider text-[9px] text-slate-300">NOTEBOOK 11</span>
+              </div>
+              <span class="text-[9px] text-emerald-400">1366×768 LCD</span>
             </div>
 
-            <div class="canvas-container crt-screen-wrapper relative aspect-square w-full max-w-[75vw] sm:w-72 sm:h-72 flex items-center justify-center bg-slate-950 rounded border border-emerald-500/40 overflow-hidden">
+            <div class="canvas-container crt-screen-wrapper relative aspect-square w-full max-w-[72vw] sm:w-64 sm:h-64 flex items-center justify-center bg-slate-950 rounded border border-slate-700 overflow-hidden shadow-inner">
               <div class="screen-glare"></div>
-              <canvas id="canvas-workstation" class="w-full h-full object-contain cursor-crosshair"></canvas>
-            </div>
-          </div>
-
-          <div class="shell-hardware-el w-full mt-2 sm:mt-3 flex items-center justify-between px-2 sm:px-3 font-code">
-            <div class="flex items-center space-x-2">
-              <span class="text-[10px] sm:text-xs font-bold text-slate-300 tracking-widest">WORKSTATION 1600</span>
+              <canvas id="canvas-lenovo" class="w-full h-full object-contain cursor-crosshair"></canvas>
             </div>
 
-            <div class="flex items-center space-x-2 sm:space-x-3">
-              <div class="rotary-dial" title="Brightness"></div>
-              <div class="rotary-dial" title="Contrast"></div>
-              <button onclick="app.toggleAudio()" class="w-5 h-5 rounded-full bg-emerald-500 border border-emerald-700 shadow-md flex items-center justify-center text-[8px] text-slate-950 font-bold tactile-btn">
-                <i class="fa-solid fa-power-off"></i>
-              </button>
+            <div class="shell-hardware-el w-full mt-2 flex items-center justify-between px-1 text-[9px] font-code text-slate-400">
+              <span>STUDIOBOOK</span>
+              <div class="flex items-center space-x-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="shell-hardware-el stand-neck"></div>
-        <div class="shell-hardware-el stand-base"></div>
+        <!-- Hinge -->
+        <div class="shell-hardware-el lenovo-hinge"></div>
 
-        <div class="shell-hardware-el workstation-dock mt-2 w-full max-w-md bg-slate-900 border border-slate-700 p-2 sm:p-2.5 rounded-xl flex items-center justify-between shadow-xl font-code">
-          <div class="flex space-x-1.5">
-            <button onclick="app.setTool('pencil')" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-emerald-400 text-xs font-bold hover:bg-slate-700">DRAW</button>
-            <button onclick="app.setTool('bucket')" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-emerald-400 text-xs font-bold hover:bg-slate-700">FILL</button>
-            <button onclick="app.clearCanvas()" class="px-2 py-1 rounded bg-slate-800 border border-slate-600 text-rose-400 text-xs font-bold hover:bg-slate-700">CLR</button>
+        <!-- Office Medium-Grey Keyboard Deck -->
+        <div class="shell-hardware-el lenovo-deck w-full p-2.5 sm:p-3.5 flex flex-col items-center space-y-2 shadow-xl font-code">
+          <div class="w-full grid grid-cols-6 gap-1 sm:gap-1.5 relative">
+            <button onclick="app.setTool('pencil')" class="lenovo-key py-1.5 rounded text-[9px] sm:text-[10px] font-semibold tactile-btn">DRAW</button>
+            <button onclick="app.setTool('line')" class="lenovo-key py-1.5 rounded text-[9px] sm:text-[10px] font-semibold tactile-btn">LINE</button>
+            <button onclick="app.setTool('bucket')" class="lenovo-key py-1.5 rounded text-[9px] sm:text-[10px] font-semibold tactile-btn">FILL</button>
+            <button onclick="app.setTool('eraser')" class="lenovo-key py-1.5 rounded text-[9px] sm:text-[10px] font-semibold tactile-btn">ERASE</button>
+            <button onclick="app.undo()" class="lenovo-key py-1.5 rounded text-[9px] sm:text-[10px] font-semibold tactile-btn">UNDO</button>
+            <button onclick="app.clearCanvas()" class="lenovo-key py-1.5 rounded text-[9px] sm:text-[10px] font-semibold text-rose-300 tactile-btn">CLR</button>
           </div>
-          <button onclick="app.openSouvenirModal()" class="px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 shadow">
-            EXPORT
-          </button>
+
+          <div class="w-full flex items-center justify-between pt-0.5 px-1">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-[9px] text-slate-700 font-bold tracking-wider">WORKPAD</span>
+            </div>
+
+            <!-- Red Trackpoint Accent + Click Strip -->
+            <div class="flex flex-col items-center space-y-1">
+              <div class="lenovo-trackpoint" title="TrackPoint Accent"></div>
+              <div class="flex space-x-1">
+                <span class="w-7 h-1.5 rounded-sm bg-slate-600 border border-slate-700"></span>
+                <span class="w-3 h-1.5 rounded-sm bg-rose-600"></span>
+                <span class="w-7 h-1.5 rounded-sm bg-slate-600 border border-slate-700"></span>
+              </div>
+            </div>
+
+            <button onclick="app.openSouvenirModal()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-100 text-[9px] sm:text-[10px] font-bold border border-slate-900 shadow tactile-btn">
+              CARD
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- THEME 6: PSP-STYLE (Slick Piano Black) -->
+      <div id="shell-psp" class="shell-psp p-3 sm:p-4 flex flex-col items-center justify-between relative shadow-2xl hidden max-w-[95vw] sm:max-w-[660px]">
+        <div class="psp-body w-full px-3 py-3 sm:px-5 sm:py-4 flex items-center justify-between gap-2 sm:gap-4 relative">
+          
+          <!-- Left Grip & Directional Controls -->
+          <div class="shell-hardware-el flex flex-col items-center justify-center space-y-3 shrink-0">
+            <div class="psp-dpad" title="Directional Pad">
+              <button onclick="app.setTool('pencil')" class="psp-dpad-btn psp-up" title="Pencil"><i class="fa-solid fa-caret-up text-[9px]"></i></button>
+              <button onclick="app.setTool('eraser')" class="psp-dpad-btn psp-down" title="Eraser"><i class="fa-solid fa-caret-down text-[9px]"></i></button>
+              <button onclick="app.undo()" class="psp-dpad-btn psp-left" title="Undo"><i class="fa-solid fa-caret-left text-[9px]"></i></button>
+              <button onclick="app.setTool('bucket')" class="psp-dpad-btn psp-right" title="Fill"><i class="fa-solid fa-caret-right text-[9px]"></i></button>
+              <div class="psp-dpad-center"></div>
+            </div>
+            <div class="psp-analog" title="Analog Thumbstick"></div>
+          </div>
+
+          <!-- Center Widescreen Bezel + Square Pixel Matrix -->
+          <div class="psp-screen-bezel flex-1 p-2 sm:p-3 flex flex-col items-center justify-center relative">
+            <div class="shell-hardware-el w-full flex items-center justify-between text-[9px] font-code text-zinc-400 mb-1.5 px-1">
+              <span class="tracking-widest font-semibold text-zinc-300">PORTABLE</span>
+              <span class="text-zinc-500">LCD MATRIX</span>
+            </div>
+
+            <div class="canvas-container crt-screen-wrapper relative aspect-square w-full max-w-[54vw] sm:w-64 sm:h-64 flex items-center justify-center bg-black rounded border border-zinc-800 overflow-hidden shadow-inner">
+              <div class="screen-glare"></div>
+              <canvas id="canvas-psp" class="w-full h-full object-contain cursor-crosshair"></canvas>
+            </div>
+          </div>
+
+          <!-- Right Grip & Face Buttons -->
+          <div class="shell-hardware-el flex flex-col items-center justify-center space-y-3 shrink-0">
+            <div class="psp-face-cluster">
+              <button onclick="app.setTool('line')" class="psp-face-btn psp-btn-top tactile-btn" title="Line Tool">•</button>
+              <button onclick="app.setTool('bucket')" class="psp-face-btn psp-btn-right tactile-btn" title="Fill Tool">•</button>
+              <button onclick="app.setTool('pencil')" class="psp-face-btn psp-btn-bottom tactile-btn" title="Pencil Tool">•</button>
+              <button onclick="app.undo()" class="psp-face-btn psp-btn-left tactile-btn" title="Undo">•</button>
+            </div>
+
+            <!-- Power / Hold Status LEDs -->
+            <div class="flex items-center space-x-2 pt-1">
+              <div class="flex items-center space-x-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[7px] font-code text-zinc-400">PWR</span>
+              </div>
+              <div class="flex items-center space-x-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                <span class="text-[7px] font-code text-zinc-400">MEM</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Silver-Trimmed Control Bar -->
+        <div class="shell-hardware-el psp-bottom-bar w-full mt-2 px-4 py-1.5 flex items-center justify-between text-[8px] font-code text-zinc-300">
+          <div class="flex items-center space-x-1.5">
+            <button onclick="app.toggleCRT()" class="psp-pill-btn tactile-btn">DISP</button>
+            <button onclick="app.toggleAudio()" class="psp-pill-btn tactile-btn">MUTE</button>
+          </div>
+          <span class="tracking-widest text-zinc-400 hidden sm:inline">PORTABLE STUDIO</span>
+          <div class="flex items-center space-x-1.5">
+            <button onclick="app.undo()" class="psp-pill-btn tactile-btn">SELECT</button>
+            <button onclick="app.clearCanvas()" class="psp-pill-btn tactile-btn">START</button>
+          </div>
         </div>
       </div>
 
@@ -446,36 +536,36 @@
   </main>
 
   <!-- MODALS -->
-  <div id="modal-builders-byte" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
-    <div class="studio-panel w-full max-w-lg rounded-xl p-5 sm:p-6 md:p-8 shadow-2xl relative">
-      <button onclick="app.closeModal('modal-builders-byte')" class="absolute top-4 right-4 w-8 h-8 rounded-lg studio-control flex items-center justify-center text-xs">
+  <div id="modal-builders-byte" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+    <div class="studio-panel w-full max-w-lg rounded-xl p-5 sm:p-6 md:p-8 shadow-2xl relative my-auto">
+      <button onclick="app.closeModal('modal-builders-byte')" class="absolute top-4 right-4 w-8 h-8 rounded-lg studio-control flex items-center justify-center text-xs" aria-label="Close Builder's Byte">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <div class="space-y-4">
         <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded studio-well text-xs font-code">
-          <i class="fa-solid fa-terminal"></i>
+          <i class="fa-solid fa-microchip"></i>
           <span>Builder's Byte</span>
         </div>
 
-        <h2 class="text-xl md:text-2xl font-bold tracking-tight theme-modal-title">Tactile Retro Hardware Sandbox</h2>
-
         <div class="text-xs md:text-sm space-y-3 leading-relaxed opacity-90">
           <p>
-            Welcome to <strong>An Artistic Bit</strong>. Pixel artwork belongs inside physical hardware displays—not floating on flat, sterile modern web pages.
+            In computing, a bit is the smallest unit of digital information, a single binary signal, and in classic graphics it recalls the early pixel eras where every square on screen counted. Here, it is both a tiny block of color on the grid and a small piece of an idea taking shape.
           </p>
           <p>
-            Each theme transforms your entire workspace—from fonts and buttons to background lighting and audio synthesis. Switch seamlessly between <strong>Midnight Studio</strong>, <strong>Game Boy Color-Style</strong>, <strong>14" CRT Phillips-Style</strong>, and <strong>16" Workstation CRT</strong>.
-          </p>
-          <p class="p-3 studio-well rounded-lg text-xs opacity-85 italic font-code">
-            "Toggle Gridlines OFF for freehand sketching, or switch to Sandbox Mode to watch sand gravity and heat diffusion take over."
+            Welcome to <strong>An Artistic Bit</strong>, a pixel studio and physics sandbox built for play and imagination. Whether you are sketching a sprite, testing symmetry, or letting sand gravity and heat bleed carry a drawing somewhere unexpected, each display theme shifts the mood of the workspace. When you make something you like, you can stamp it into a Souvenir Card so it becomes a small keepsake you can save and keep.
           </p>
         </div>
 
-        <div class="pt-2 flex justify-end">
-          <button onclick="app.closeModal('modal-builders-byte')" class="px-5 py-2 rounded-lg theme-btn-accent text-xs font-medium transition">
-            Start Creating
-          </button>
+        <div class="pt-4 border-t studio-divider flex justify-end">
+          <div class="flex flex-col items-end text-right">
+            <a href="https://github.com/musman-uk" target="_blank" rel="noopener noreferrer" class="font-signature text-lg leading-none hover:opacity-75 transition inline-block" title="Visit Mohammed Usman on GitHub">
+              Mohammed Usman
+            </a>
+            <span class="text-[10px] font-code opacity-45 mt-5">
+              © Mohammed Usman
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -488,21 +578,21 @@
       </button>
 
       <div class="text-center mb-4">
-        <h3 class="text-lg md:text-xl font-bold theme-modal-title">Builder's Byte Souvenir Card</h3>
-        <p class="text-xs font-code opacity-65">Hardware Collectible & Metadata Stamp</p>
+        <h3 class="text-lg md:text-xl font-bold theme-modal-title">Souvenir Card</h3>
+        <p class="text-xs font-code opacity-65">Hardware Collectible &amp; Metadata Stamp</p>
       </div>
 
-      <div id="souvenir-card-container" class="bg-slate-950 border border-slate-700 rounded-lg p-4 sm:p-5 shadow-inner space-y-3 sm:space-y-4">
+      <div id="souvenir-card-container" class="bg-slate-950 text-slate-100 border border-slate-700 rounded-lg p-4 sm:p-5 shadow-inner space-y-3 sm:space-y-4">
         <div class="flex items-center justify-between border-b border-white/10 pb-3">
           <div class="flex items-center space-x-2">
             <div class="w-2.5 h-2.5 rounded-sm bg-lime-400"></div>
-            <span class="text-xs font-code font-bold tracking-wider" id="souvenir-card-title">AN ARTISTIC BIT • MIDNIGHT STUDIO</span>
+            <span class="text-xs font-code font-bold tracking-wider" id="souvenir-card-title">AN ARTISTIC BIT • NIGHT STUDIO</span>
           </div>
           <span id="souvenir-timestamp" class="text-[10px] font-code opacity-60">2026.11.26</span>
         </div>
 
         <div class="flex justify-center my-2">
-          <div class="p-3 bg-slate-900 border border-slate-800 rounded-lg shadow-inner">
+          <div id="souvenir-preview-box" class="p-3 bg-slate-900 border border-slate-800 rounded-lg shadow-inner">
             <img id="souvenir-preview-img" class="w-36 h-36 sm:w-44 sm:h-44 object-contain rounded border border-white/10" alt="Canvas Souvenir Artwork" />
           </div>
         </div>
@@ -510,7 +600,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left font-code">
           <div class="p-2 bg-slate-900 rounded border border-slate-800">
             <div class="text-[9px] opacity-60 uppercase">Hardware Theme</div>
-            <div id="souvenir-housing" class="text-xs font-bold text-lime-300">Midnight Studio</div>
+            <div id="souvenir-housing" class="text-xs font-bold text-lime-300">Night Studio</div>
           </div>
           <div class="p-2 bg-slate-900 rounded border border-slate-800">
             <div class="text-[9px] opacity-60 uppercase">Active Pixels</div>
@@ -554,19 +644,19 @@
     </div>
   </div>
 
-  <div id="modal-devtools" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
-    <div class="studio-panel w-full max-w-lg rounded-xl p-5 sm:p-6 shadow-2xl relative">
+  <div id="modal-devtools" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+    <div class="studio-panel w-full max-w-lg rounded-xl p-5 sm:p-6 shadow-2xl relative my-auto">
       <button onclick="app.closeModal('modal-devtools')" class="absolute top-4 right-4 w-8 h-8 rounded-lg studio-control flex items-center justify-center text-xs">
         <i class="fa-solid fa-xmark"></i>
       </button>
 
       <div class="space-y-4">
         <div class="inline-flex items-center space-x-2 px-2.5 py-1 rounded studio-well text-xs font-code">
-          <i class="fa-solid fa-code text-emerald-400"></i>
+          <i class="fa-solid fa-code text-emerald-500"></i>
           <span>Developer Tools</span>
         </div>
 
-        <h3 class="text-xl font-bold theme-modal-title">Export Code Matrix & Sprites</h3>
+        <h3 class="text-xl font-bold theme-modal-title">Export Code Matrix &amp; Sprites</h3>
         <p class="text-xs opacity-75 leading-relaxed">
           Convert your current pixel grid into developer-ready 2D JSON arrays or scaled PNG sprites for game engines.
         </p>
@@ -574,7 +664,7 @@
         <div class="space-y-3 pt-2">
           <div class="p-3 studio-well rounded-lg space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold font-code text-emerald-400">2D Matrix JSON Array</span>
+              <span class="text-xs font-bold font-code text-emerald-500">2D Matrix JSON Array</span>
               <span class="text-[10px] font-code opacity-60">[[color,...],...]</span>
             </div>
             <div class="flex space-x-2">
@@ -591,7 +681,7 @@
 
           <div class="p-3 studio-well rounded-lg space-y-2">
             <div class="flex justify-between items-center">
-              <span class="text-xs font-bold font-code text-cyan-400">Scaled Sprite PNG</span>
+              <span class="text-xs font-bold font-code text-sky-500">Scaled Sprite PNG</span>
               <div class="flex items-center space-x-1 text-[11px] font-code">
                 <span>Scale:</span>
                 <select id="select-sprite-scale" class="studio-control rounded px-1 text-xs">
@@ -602,7 +692,7 @@
                 </select>
               </div>
             </div>
-            <button onclick="app.downloadSpritePNG()" class="w-full px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-code transition flex items-center justify-center space-x-1.5">
+            <button onclick="app.downloadSpritePNG()" class="w-full px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-code transition flex items-center justify-center space-x-1.5">
               <i class="fa-solid fa-image"></i>
               <span>Export Clean Sprite PNG</span>
             </button>
@@ -622,11 +712,9 @@
     <div class="studio-panel px-6 py-2.5 rounded-full text-xs font-code shadow-2xl flex items-center space-x-3 pointer-events-auto">
       <div class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></div>
       <span>Replaying Time-Lapse...</span>
-      <button onclick="app.stopReplay()" class="ml-2 px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/40 text-[10px]">Stop</button>
+      <button onclick="app.stopReplay()" class="ml-2 px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 text-[10px]">Stop</button>
     </div>
   </div>
-
-  <canvas id="offscreen-card-canvas" width="600" height="750" class="hidden"></canvas>
 
   <script type="module" src="./app.js"></script>
 </body>

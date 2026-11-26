@@ -1,6 +1,6 @@
 # 🟦 An Artistic Bit
 
-This repository contains [An Artistic Bit](https://musman-uk.github.io/an-artistic-bit/) - an interactive retro hardware pixel studio and physics sandbox web application featuring physical display themes, Web Audio sound synthesis, granular physics, and souvenir card exports built with Parcel and Tailwind CSS.
+This repository contains [An Artistic Bit](https://musman-uk.github.io/an-artistic-bit/) – an interactive retro display pixel studio and physics sandbox web application featuring Night and Day studio modes, classic hardware display themes, Web Audio sound synthesis, granular physics, and souvenir card exports built with Parcel and Tailwind CSS.
 
 ---
 
@@ -12,11 +12,11 @@ A short summary of what each part of the project contains:
 - `src/app.js` – main application controller, rendering loop, event bindings, and UI coordination  
 - `src/exporter.js` – canvas export utilities for matrix JSON arrays, sprite PNGs, and souvenir card generation  
 - `src/index.html` – main HTML entry file containing hardware shells, toolbars, and modal structures  
-- `src/physics.js` – granular physics reactor logic for sand gravity, glitch decay, heat bleed, and wave echo  
-- `src/state.js` – central state container managing pixel grid matrices, tool configurations, and undo history  
-- `src/style.css` – custom CSS definitions for hardware themes, CRT scanline effects, glass glare, and layout rules  
-- `src/synth.js` – Web Audio API synthesizer for retro theme-specific sound effects and timbres  
-- `src/themes.js` – preset color palette data and environmental theme display managers  
+- `src/physics.js` – granular physics reactor logic for sand gravity, chroma glitch, heat bleed, and wave echo  
+- `src/state.js` – central state container managing pixel grid matrices, auto-save storage, tool configurations, and undo history  
+- `src/style.css` – custom CSS definitions for studio and hardware themes, CRT scanline effects, glass glare, and layout rules  
+- `src/synth.js` – Web Audio API synthesizer for theme-specific sound effects and timbres  
+- `src/themes.js` – preset color palette data, color-scheme detection, and environmental theme display managers  
 - `src/tools.js` – drawing algorithms for pencil, line, flood fill, eraser, color sampling, and symmetry axes  
 - `.gitignore` – patterns specifying files and directories excluded from version control  
 - `package.json` – project dependencies, Parcel target settings, and build scripts  
@@ -38,9 +38,8 @@ A simplified view of how the website is being developed:
 
 ## Status
 
-Version `0.0.0` – Unpublished  
+Version `1.0.0` – Unpublished  
 
 ---
 
 <sub>© Mohammed Usman</sub>
-

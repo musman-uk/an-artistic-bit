@@ -14,19 +14,54 @@ class AnArtisticBitApp {
     const restored = this.state.loadFromStorage();
     if (!restored) {
       this.state.initGrid();
-      this.loadPalettePreset('midnight');
+      const preferredTheme = ThemeManager.getPreferredStudioTheme();
+      ThemeManager.applyTheme(preferredTheme, this.state);
+      this.loadPalettePreset(preferredTheme, true, false);
     } else {
-      ThemeManager.applyTheme(this.state.activeTheme, this.state);
-      const presetMap = { midnight: 'midnight', gbc: 'gbc', tv: 'arcade', workstation: 'monochrome' };
-      this.loadPalettePreset(presetMap[this.state.activeTheme] || 'midnight', false);
-      this.setColor(this.state.currentColor, false);
+      const targetTheme = this.state.hasCustomTheme
+        ? this.state.activeTheme
+        : ThemeManager.getPreferredStudioTheme();
+      ThemeManager.applyTheme(targetTheme, this.state);
+
+      const presetMap = {
+        night: 'night',
+        day: 'day',
+        gbc: 'gbc',
+        tv: 'arcade',
+        lenovo: 'office',
+        psp: 'psp'
+      };
+      const initialPalette = this.state.hasCustomTheme
+        ? (this.state.activePalette || presetMap[targetTheme] || 'night')
+        : targetTheme;
+      this.loadPalettePreset(initialPalette, !this.state.hasCustomTheme, false);
+      if (this.state.hasCustomTheme) {
+        this.setColor(this.state.currentColor, false);
+      }
       this.syncRestoredUI();
     }
 
+    this.setupSystemSchemeListener();
     this.setupActiveCanvas();
     this.setupEventListeners();
 
     requestAnimationFrame((t) => this.gameLoop(t));
+  }
+
+  setupSystemSchemeListener() {
+    if (!window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+    const handleSchemeChange = (e) => {
+      if (this.state.hasCustomTheme) return;
+      const nextTheme = e.matches ? 'day' : 'night';
+      ThemeManager.applyTheme(nextTheme, this.state);
+      this.loadPalettePreset(nextTheme, true, false);
+      this.setupActiveCanvas();
+    };
+
+    if (mq.addEventListener) {
+      mq.addEventListener('change', handleSchemeChange);
+    }
   }
 
   syncRestoredUI() {
@@ -41,20 +76,22 @@ class AnArtisticBitApp {
     const icon = document.getElementById('icon-audio');
     if (icon) {
       icon.className = this.state.audioEnabled
-        ? 'fa-solid fa-volume-high text-lime-400'
+        ? 'fa-solid fa-volume-high text-emerald-500'
         : 'fa-solid fa-volume-xmark opacity-50';
     }
   }
 
   setupActiveCanvas() {
     const canvasIds = {
-      midnight: 'canvas-midnight',
+      night: 'canvas-studio',
+      day: 'canvas-studio',
       gbc: 'canvas-gbc',
       tv: 'canvas-tv',
-      workstation: 'canvas-workstation'
+      lenovo: 'canvas-lenovo',
+      psp: 'canvas-psp'
     };
 
-    const targetId = canvasIds[this.state.activeTheme] || 'canvas-midnight';
+    const targetId = canvasIds[this.state.activeTheme] || 'canvas-studio';
     this.canvas = document.getElementById(targetId);
 
     if (this.canvas) {
@@ -135,7 +172,7 @@ class AnArtisticBitApp {
       this.state.saveToStorage();
     };
 
-    ['canvas-midnight', 'canvas-gbc', 'canvas-tv', 'canvas-workstation'].forEach(id => {
+    ['canvas-studio', 'canvas-gbc', 'canvas-tv', 'canvas-lenovo', 'canvas-psp'].forEach(id => {
       const cvs = document.getElementById(id);
       if (cvs) {
         cvs.addEventListener('pointerdown', handlePointerDown);
@@ -273,7 +310,9 @@ class AnArtisticBitApp {
     }
 
     if (this.state.showGridlines) {
-      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      this.ctx.strokeStyle = this.state.activeTheme === 'day'
+        ? 'rgba(28, 25, 23, 0.1)'
+        : 'rgba(255, 255, 255, 0.08)';
       this.ctx.lineWidth = 1;
 
       for (let i = 0; i <= this.state.gridSize; i++) {
@@ -330,12 +369,18 @@ class AnArtisticBitApp {
   }
 
   setTheme(themeKey) {
+    this.state.hasCustomTheme = true;
     ThemeManager.applyTheme(themeKey, this.state);
 
-    if (themeKey === 'midnight') this.loadPalettePreset('midnight');
-    else if (themeKey === 'gbc') this.loadPalettePreset('gbc');
-    else if (themeKey === 'tv') this.loadPalettePreset('arcade');
-    else if (themeKey === 'workstation') this.loadPalettePreset('monochrome');
+    const paletteByTheme = {
+      night: 'night',
+      day: 'day',
+      gbc: 'gbc',
+      tv: 'arcade',
+      lenovo: 'office',
+      psp: 'psp'
+    };
+    this.loadPalettePreset(paletteByTheme[themeKey] || 'night', true, false);
 
     this.state.saveToStorage();
     setTimeout(() => this.setupActiveCanvas(), 50);
@@ -344,14 +389,17 @@ class AnArtisticBitApp {
   toggleFocusMode() {
     this.state.focusMode = !this.state.focusMode;
     const viewport = document.getElementById('hardware-viewport');
-    const btnLabel = document.getElementById('label-focus');
+    const btnFocus = document.getElementById('btn-focus-toggle');
+    const iconFocus = document.getElementById('icon-focus');
 
     if (this.state.focusMode) {
       viewport.classList.add('focus-mode');
-      btnLabel.innerText = 'Hardware View';
+      if (btnFocus) btnFocus.title = 'Switch to Hardware View';
+      if (iconFocus) iconFocus.className = 'fa-solid fa-compress text-amber-500';
     } else {
       viewport.classList.remove('focus-mode');
-      btnLabel.innerText = 'Focus View';
+      if (btnFocus) btnFocus.title = 'Switch to Focus View';
+      if (iconFocus) iconFocus.className = 'fa-solid fa-expand text-amber-500';
     }
     setTimeout(() => this.resizeCanvas(), 50);
   }
@@ -364,13 +412,13 @@ class AnArtisticBitApp {
     const panelSandbox = document.getElementById('panel-sandbox-tools');
 
     if (mode === 'studio') {
-      btnStudio.className = 'px-2.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 sm:space-x-2 theme-btn-accent';
-      btnSandbox.className = 'px-2.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium opacity-60 hover:opacity-100 transition flex items-center space-x-1.5 sm:space-x-2';
+      btnStudio.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium transition flex items-center space-x-1.5 sm:space-x-2 theme-btn-accent';
+      btnSandbox.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium opacity-60 hover:opacity-100 transition flex items-center space-x-1.5 sm:space-x-2';
       panelStudio.classList.remove('hidden');
       panelSandbox.classList.add('hidden');
     } else {
-      btnSandbox.className = 'px-2.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 sm:space-x-2 theme-btn-accent';
-      btnStudio.className = 'px-2.5 sm:px-4 py-1.5 rounded-lg text-xs font-medium opacity-60 hover:opacity-100 transition flex items-center space-x-1.5 sm:space-x-2';
+      btnSandbox.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium transition flex items-center space-x-1.5 sm:space-x-2 theme-btn-accent';
+      btnStudio.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium opacity-60 hover:opacity-100 transition flex items-center space-x-1.5 sm:space-x-2';
       panelSandbox.classList.remove('hidden');
       panelStudio.classList.add('hidden');
     }
@@ -417,32 +465,36 @@ class AnArtisticBitApp {
     if (persist) this.state.saveToStorage();
   }
 
-  loadPalettePreset(name, setDefaultColor = true) {
-    const colors = PALETTES[name] || PALETTES.midnight;
+  loadPalettePreset(name, setDefaultColor = true, persist = true) {
+    const resolvedName = PALETTES[name] ? name : 'night';
+    const colors = PALETTES[resolvedName];
+    this.state.activePalette = resolvedName;
+
     const container = document.getElementById('palette-swatches');
     container.innerHTML = '';
 
     const selectPreset = document.getElementById('select-preset-palette');
-    if (selectPreset && selectPreset.value !== name) {
-      selectPreset.value = name;
+    if (selectPreset && selectPreset.value !== resolvedName) {
+      selectPreset.value = resolvedName;
     }
 
     colors.forEach(hex => {
       const btn = document.createElement('button');
-      btn.className = 'w-6 h-6 rounded border border-white/20 hover:scale-110 transition shadow-sm';
+      btn.className = 'rounded palette-swatch hover:scale-110 transition shadow-sm';
       btn.style.backgroundColor = hex;
       btn.onclick = () => this.setColor(hex);
       container.appendChild(btn);
     });
 
     if (setDefaultColor) {
-      this.setColor(colors[0]);
+      this.setColor(colors[0], persist);
+    } else if (persist) {
+      this.state.saveToStorage();
     }
   }
 
   updateGridResolutionUI() {
     const isFreehand = !this.state.showGridlines;
-    const freehandBadge = document.getElementById('freehand-res-badge');
 
     [16, 32, 48].forEach(s => {
       const btn = document.getElementById(`grid-size-${s}`);
@@ -454,13 +506,9 @@ class AnArtisticBitApp {
       }
     });
 
-    if (freehandBadge) {
-      freehandBadge.classList.toggle('hidden', !isFreehand);
-    }
-
     const gridBtn = document.getElementById('btn-toggle-gridlines');
     if (gridBtn) {
-      gridBtn.innerText = isFreehand ? 'OFF · FREEHAND' : 'ON';
+      gridBtn.innerText = isFreehand ? 'Off' : 'On';
     }
   }
 
@@ -476,13 +524,11 @@ class AnArtisticBitApp {
     this.state.showGridlines = !this.state.showGridlines;
 
     if (!this.state.showGridlines) {
-      // Entering Freehand mode: switch to 256x256 native-feel resolution while preserving current art
       if ([16, 32, 48].includes(this.state.gridSize)) {
         this.state.lastGridResolution = this.state.gridSize;
       }
       this.state.resizeGrid(FREEHAND_RESOLUTION);
     } else {
-      // Returning to Grid mode: snap back to last selected grid resolution
       const targetGrid = this.state.lastGridResolution || 32;
       this.state.resizeGrid(targetGrid);
     }
@@ -502,7 +548,7 @@ class AnArtisticBitApp {
   toggleAudio() {
     this.state.audioEnabled = !this.state.audioEnabled;
     const icon = document.getElementById('icon-audio');
-    icon.className = this.state.audioEnabled ? 'fa-solid fa-volume-high text-lime-400' : 'fa-solid fa-volume-xmark opacity-50';
+    icon.className = this.state.audioEnabled ? 'fa-solid fa-volume-high text-emerald-500' : 'fa-solid fa-volume-xmark opacity-50';
     this.state.saveToStorage();
   }
 
@@ -517,6 +563,19 @@ class AnArtisticBitApp {
 
   closeModal(id) {
     document.getElementById(id).classList.add('hidden');
+  }
+
+  openDevToolsModal() {
+    const scaleSelect = document.getElementById('select-sprite-scale');
+    if (scaleSelect) {
+      const base = this.state.gridSize;
+      const scales = [1, 4, 8, 16];
+      Array.from(scaleSelect.options).forEach((opt, i) => {
+        const mult = scales[i] || parseInt(opt.value, 10);
+        opt.text = mult === 1 ? `1x (${base}px Native)` : `${mult}x (${base * mult}px)`;
+      });
+    }
+    this.openModal('modal-devtools');
   }
 
   copyMatrixJSON() {
@@ -537,10 +596,17 @@ class AnArtisticBitApp {
 
   openSouvenirModal() {
     const stats = Exporter.calculateStats(this.state);
-    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Midnight Studio';
+    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Night Studio';
     const modeLabel = this.state.showGridlines
       ? `${this.state.gridSize} x ${this.state.gridSize}`
       : `Freehand (${this.state.gridSize}x${this.state.gridSize})`;
+
+    const previewBox = document.getElementById('souvenir-preview-box');
+    if (previewBox) {
+      previewBox.className = this.state.activeTheme === 'day'
+        ? 'p-3 bg-[#faf8f5] border border-slate-700 rounded-lg shadow-inner'
+        : 'p-3 bg-slate-900 border border-slate-800 rounded-lg shadow-inner';
+    }
 
     document.getElementById('souvenir-preview-img').src = this.canvas.toDataURL();
     document.getElementById('souvenir-housing').innerText = housingTitle;
@@ -557,14 +623,15 @@ class AnArtisticBitApp {
 
   downloadSouvenirCard() {
     const stats = Exporter.calculateStats(this.state);
-    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Midnight Studio';
+    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Night Studio';
     Exporter.renderSouvenirCard(
       this.canvas,
       housingTitle,
       stats.activePixels,
       stats.entropy,
       this.state.gridSize,
-      this.state.showGridlines
+      this.state.showGridlines,
+      this.state.activeTheme
     );
   }
 }
