@@ -33,8 +33,13 @@ export class Exporter {
     return { activePixels, dominantColor, entropy };
   }
 
+  static formatMatrixJSON(grid) {
+    const rows = grid.map((row) => '  ' + JSON.stringify(row));
+    return `[\n${rows.join(',\n')}\n]`;
+  }
+
   static copyMatrixJSON(grid) {
-    const json = JSON.stringify(grid, null, 2);
+    const json = this.formatMatrixJSON(grid);
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(json);
     } else {
@@ -48,7 +53,7 @@ export class Exporter {
   }
 
   static downloadMatrixJSON(grid) {
-    const json = JSON.stringify(grid, null, 2);
+    const json = this.formatMatrixJSON(grid);
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -125,10 +130,6 @@ export class Exporter {
     ctx.fillText(`ENTROPY SCORE  : ${entropy.toFixed(2)} bits`, 50, 560);
     ctx.fillText(`CANVAS MODE    : ${resLabel}`, 50, 590);
     ctx.fillText(`TIMESTAMP      : ${new Date().toISOString().slice(0, 10)}`, 50, 620);
-
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 12px "Fira Code", monospace';
-    ctx.fillText('• AN ARTISTIC BIT • HARDWARE ARTIFACT •', 148, 690);
 
     const a = document.createElement('a');
     a.download = `An-Artistic-Bit-Souvenir-${Date.now()}.png`;

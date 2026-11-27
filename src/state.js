@@ -5,9 +5,9 @@ export class AppState {
   constructor() {
     this.gridSize = 32;
     this.lastGridResolution = 32;
-    this.currentMode = 'studio'; // 'studio' | 'sandbox'
+    this.currentMode = 'studio';
     this.currentTool = 'pencil'; // 'pencil' | 'line' | 'bucket' | 'eraser' | 'picker'
-    this.currentBehavior = 'sand'; // 'sand' | 'glitch' | 'bleed' | 'wave'
+    this.currentBehavior = 'off'; // 'off' | 'sand' | 'glitch' | 'bleed' | 'wave'
     this.symmetryMode = 'off'; // 'off' | 'x' | 'y' | 'quad'
     this.currentColor = '#6366f1';
     this.simSpeed = 1.0;
@@ -101,7 +101,7 @@ export class AppState {
     if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) return;
     if (this.grid[y][x] === color) return;
     this.grid[y][x] = color;
-    this.actionLog.push({ x, y, color, mode: this.currentMode, timestamp: Date.now() });
+    this.actionLog.push({ x, y, color, mode: this.currentBehavior, timestamp: Date.now() });
   }
 
   saveToStorage() {
