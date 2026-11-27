@@ -10,8 +10,8 @@ export const PALETTES = {
 };
 
 export const THEME_TITLES = {
-  night: "Night Studio",
-  day: "Day Studio",
+  night: "Night",
+  day: "Day",
   gbc: "Game Boy Color-Style",
   tv: '14" CRT Philips-Style',
   lenovo: '11" Lenovo-Style',

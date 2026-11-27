@@ -64,12 +64,12 @@ canvas {
   background: var(--studio-control-bg);
   border: 1px solid var(--studio-border);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 .studio-control:hover {
   background: var(--studio-control-hover);
 }
-.studio-control:active {
+.studio-control:not(select):active {
   transform: translateY(1px);
 }
 .studio-chip-active {
@@ -117,6 +117,18 @@ canvas {
 .studio-canvas-well {
   background: var(--studio-canvas-bg, transparent);
 }
+
+/* FLUID 1:1 HARDWARE SCREEN SIZING ACROSS PHONE, TABLET & LAPTOP */
+.hw-screen-box {
+  width: clamp(168px, 44vw, 224px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+.studio-shell-box {
+  width: clamp(224px, 42vw, 360px);
+  max-width: 100%;
+}
+
 
 /* THEME 1: NIGHT STUDIO (Warm Charcoal Drafting Desk) */
 body.theme-night {
@@ -244,7 +256,10 @@ body.theme-gbc .theme-header-title {
   font-family: '"Press Start 2P"', monospace;
   color: #a3e635;
   text-shadow: 2px 2px 0 #1a2e05;
-  font-size: 0.85rem;
+  font-size: clamp(0.6rem, 2.5vw, 0.85rem);
+}
+body.theme-gbc #btn-builders-byte-mobile {
+  font-size: 0.58rem;
 }
 
 .shell-gbc {
@@ -252,8 +267,7 @@ body.theme-gbc .theme-header-title {
   border-radius: 20px 20px 80px 20px;
   box-shadow: inset -5px -5px 12px #3f6212, inset 5px 5px 12px #d9f99d, 0 30px 60px rgba(0, 0, 0, 0.85);
   border: 4px solid #2d4a0a;
-  width: 100%;
-  max-width: 450px;
+  width: fit-content;
 }
 .shell-gbc .bezel-gbc {
   background: #1e293b;
@@ -301,7 +315,7 @@ body.theme-tv .theme-btn-accent {
 body.theme-tv .theme-header-title {
   font-family: 'VT323', monospace;
   color: #22c55e;
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 4.5vw, 1.5rem);
   text-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
 }
 
@@ -310,8 +324,7 @@ body.theme-tv .theme-header-title {
   border-radius: 28px;
   box-shadow: inset -6px -6px 14px #9ea3ac, inset 6px 6px 14px #ffffff, 0 30px 60px rgba(0, 0, 0, 0.95);
   border: 4px solid #898d92;
-  width: 100%;
-  max-width: 680px;
+  width: fit-content;
 }
 .shell-tv .tv-screen-bezel {
   background: #2a2e35;
@@ -323,7 +336,7 @@ body.theme-tv .theme-header-title {
 .rca-jack-yellow { width: 12px; height: 12px; border-radius: 50%; background: #facc15; border: 2px solid #222; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8); }
 .rca-jack-white { width: 12px; height: 12px; border-radius: 50%; background: #ffffff; border: 2px solid #222; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8); }
 
-/* THEME 5: 11" LENOVO-STYLE (Office Medium Grey) */
+/* THEME 5: 11" LENOVO-STYLE (Dark Charcoal Laptop) */
 body.theme-lenovo {
   --studio-panel-bg: #272a30;
   --studio-well-bg: #1c1f24;
@@ -358,56 +371,70 @@ body.theme-lenovo .theme-header-title {
   font-family: '"Fira Code"', monospace;
   color: #f8fafc;
   letter-spacing: -0.02em;
+  font-size: clamp(0.88rem, 3.4vw, 1.125rem);
 }
 
 .shell-lenovo {
-  width: 100%;
-  max-width: 540px;
+  width: clamp(280px, 54vw, 440px);
+  max-width: 100%;
 }
 .lenovo-lid {
-  background: linear-gradient(155deg, #7c828d, #626771 55%, #525760);
+  width: 96%;
+  background: linear-gradient(155deg, #32363f, #22252b 55%, #181a1f);
   border-radius: 14px 14px 4px 4px;
-  border: 2px solid #41454d;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 20px 40px rgba(0, 0, 0, 0.55);
+  border: 2px solid #121418;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 20px 40px rgba(0, 0, 0, 0.65);
 }
 .lenovo-bezel {
-  background: #181a1f;
+  width: 100%;
+  background: #121418;
   border-radius: 8px;
-  border: 2px solid #2b2f37;
-  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.9);
+  border: 2px solid #242830;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.92);
 }
 .lenovo-hinge {
-  width: 88%;
-  height: 7px;
-  background: linear-gradient(180deg, #32363e, #4a4f59);
-  border-left: 2px solid #262930;
-  border-right: 2px solid #262930;
+  width: 84%;
+  height: 6px;
+  background: linear-gradient(180deg, #16181d, #2c3038);
+  border-left: 2px solid #0f1115;
+  border-right: 2px solid #0f1115;
 }
 .lenovo-deck {
-  background: linear-gradient(180deg, #878d99, #6e737e);
+  width: 100%;
+  background: linear-gradient(180deg, #2d3139, #1e2127);
   border-radius: 4px 4px 14px 14px;
-  border: 2px solid #464b54;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 18px 32px rgba(0, 0, 0, 0.65);
+  border: 2px solid #121418;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 18px 32px rgba(0, 0, 0, 0.75);
+}
+.lenovo-kb-well {
+  background: #111317;
+  border: 1px solid rgba(58, 63, 74, 0.45);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
 }
 .lenovo-key {
-  background: #23262d;
+  background: #181a20;
   color: #e2e8f0;
-  border: 1px solid #14161b;
-  box-shadow: 0 2px 0 #111317, inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-.lenovo-key:hover {
-  background: #2e323b;
+  border: 1px solid #0b0c0f;
+  box-shadow: 0 1.5px 0 #08090c, inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .lenovo-trackpoint {
-  width: 11px;
-  height: 11px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fb7185, #be123c 70%, #881337);
   border: 1px solid #4c0519;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.lenovo-trackpad {
+  width: clamp(64px, 16vw, 96px);
+  height: 18px;
+  border-radius: 3px;
+  background: #23272f;
+  border: 1px solid #121418;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
-/* THEME 6: PSP-STYLE (Slick Piano Black) */
+/* THEME 6: PSP-STYLE (Unified Pill Silhouette, Piano Black & Silver Rim) */
 body.theme-psp {
   --studio-panel-bg: #111114;
   --studio-well-bg: #08080a;
@@ -438,36 +465,51 @@ body.theme-psp .theme-header-title {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #fafafa;
+  font-size: clamp(0.85rem, 3.2vw, 1.125rem);
 }
 
 .shell-psp {
-  width: 100%;
-  max-width: 660px;
+  width: fit-content;
+  max-width: 100%;
+}
+.shell-psp .hw-screen-box {
+  width: clamp(132px, 38vw, 224px);
 }
 .psp-body {
   background: linear-gradient(160deg, #2b2b30 0%, #0c0c0e 38%, #050507 65%, #1c1c21 100%);
-  border-radius: 56px;
-  border: 2px solid #52525b;
+  border-radius: clamp(42px, 14vw, 9999px);
+  border: 2px solid #71717a;
+  padding-inline: clamp(10px, 3vw, 20px);
+  gap: clamp(8px, 2.2vw, 18px);
   box-shadow:
-    inset 0 2px 3px rgba(255, 255, 255, 0.35),
-    inset 0 -3px 6px rgba(255, 255, 255, 0.1),
+    inset 0 2px 3px rgba(255, 255, 255, 0.38),
+    inset 0 -2px 5px rgba(255, 255, 255, 0.14),
     0 28px 56px rgba(0, 0, 0, 0.9);
+}
+.psp-center-unit {
+  border-radius: 12px;
+  border: 1px solid #3f3f46;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
 }
 .psp-screen-bezel {
   background: linear-gradient(180deg, #141417, #09090b);
-  border-radius: 12px;
-  border: 1px solid #3f3f46;
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.95);
+}
+.psp-bottom-bar {
+  background: linear-gradient(180deg, #1b1b20, #0d0d10);
+  border-top: 1px solid #52525b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 .psp-dpad {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: clamp(44px, 12vw, 64px);
+  height: clamp(44px, 12vw, 64px);
 }
 .psp-dpad-btn {
   position: absolute;
-  width: 22px;
-  height: 22px;
+  width: 33.33%;
+  height: 33.33%;
   background: linear-gradient(145deg, #27272a, #09090b);
   border: 1px solid #3f3f46;
   color: #a1a1aa;
@@ -476,24 +518,21 @@ body.theme-psp .theme-header-title {
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
-.psp-dpad-btn:active {
-  transform: scale(0.94);
-}
-.psp-up { top: 0; left: 21px; border-radius: 5px 5px 2px 2px; }
-.psp-down { bottom: 0; left: 21px; border-radius: 2px 2px 5px 5px; }
-.psp-left { left: 0; top: 21px; border-radius: 5px 2px 2px 5px; }
-.psp-right { right: 0; top: 21px; border-radius: 2px 5px 5px 2px; }
+.psp-up { top: 0; left: 33.33%; border-radius: 5px 5px 2px 2px; }
+.psp-down { bottom: 0; left: 33.33%; border-radius: 2px 2px 5px 5px; }
+.psp-left { left: 0; top: 33.33%; border-radius: 5px 2px 2px 5px; }
+.psp-right { right: 0; top: 33.33%; border-radius: 2px 5px 5px 2px; }
 .psp-dpad-center {
   position: absolute;
-  top: 21px;
-  left: 21px;
-  width: 22px;
-  height: 22px;
+  top: 33.33%;
+  left: 33.33%;
+  width: 33.33%;
+  height: 33.33%;
   background: #121215;
 }
 .psp-analog {
-  width: 26px;
-  height: 26px;
+  width: clamp(18px, 5vw, 26px);
+  height: clamp(18px, 5vw, 26px);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #3f3f46, #18181b 70%, #09090b);
   border: 1px solid #52525b;
@@ -501,49 +540,50 @@ body.theme-psp .theme-header-title {
 }
 .psp-face-cluster {
   position: relative;
-  width: 66px;
-  height: 66px;
+  width: clamp(44px, 12vw, 66px);
+  height: clamp(44px, 12vw, 66px);
 }
 .psp-face-btn {
   position: absolute;
-  width: 22px;
-  height: 22px;
+  width: 33.33%;
+  height: 33.33%;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #3f3f46, #121215 72%);
   border: 1px solid #52525b;
   color: #d4d4d8;
-  font-size: 10px;
+  font-size: clamp(8px, 2vw, 10px);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 2px 5px rgba(0, 0, 0, 0.85);
 }
-.psp-btn-top { top: 0; left: 22px; }
-.psp-btn-bottom { bottom: 0; left: 22px; }
-.psp-btn-left { left: 0; top: 22px; }
-.psp-btn-right { right: 0; top: 22px; }
+.psp-btn-top { top: 0; left: 33.33%; }
+.psp-btn-bottom { bottom: 0; left: 33.33%; }
+.psp-btn-left { left: 0; top: 33.33%; }
+.psp-btn-right { right: 0; top: 33.33%; }
 
-.psp-bottom-bar {
-  background: linear-gradient(180deg, #18181b, #09090b);
-  border-radius: 999px;
-  border: 1px solid #3f3f46;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 8px 20px rgba(0, 0, 0, 0.8);
-}
 .psp-pill-btn {
-  padding: 2px 8px;
+  padding: 2px clamp(4px, 1.4vw, 8px);
   border-radius: 999px;
   background: linear-gradient(180deg, #27272a, #121215);
   border: 1px solid #52525b;
-  font-size: 8px;
+  font-size: clamp(7px, 1.8vw, 8px);
   color: #e4e4e7;
 }
 
+
 /* FOCUS / FULLSCREEN OVERRIDES */
+#hardware-viewport.focus-mode {
+  overflow: hidden !important;
+}
+#hardware-viewport.focus-mode > div {
+  height: 100%;
+  min-height: 0;
+}
 .focus-mode .shell-gbc,
 .focus-mode .shell-tv,
 .focus-mode .shell-lenovo,
-.focus-mode .shell-psp,
-.focus-mode #shell-studio {
+.focus-mode .shell-psp {
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
@@ -560,27 +600,37 @@ body.theme-psp .theme-header-title {
 .focus-mode .lenovo-lid,
 .focus-mode .lenovo-bezel,
 .focus-mode .psp-body,
+.focus-mode .psp-center-unit,
 .focus-mode .psp-screen-bezel {
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
+  border-radius: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
-.focus-mode .canvas-container {
+.focus-mode #shell-studio {
   border: none !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  width: 100% !important;
+  width: auto !important;
   height: 100% !important;
   max-width: 100% !important;
   max-height: 100% !important;
 }
-.focus-mode canvas {
-  border-radius: 0 !important;
+.focus-mode .hw-screen-box {
+  border: 1px solid var(--studio-border) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+  width: auto !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
 }
 .focus-mode .shell-hardware-el,
 .focus-mode .screen-glare,

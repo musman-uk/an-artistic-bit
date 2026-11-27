@@ -1,5 +1,6 @@
 export class PhysicsEngine {
   static update(state, synth) {
+    if (state.currentBehavior === 'off' || state.currentBehavior === 'wave') return;
     if (Math.random() > state.simSpeed * 0.8) return;
 
     if (state.currentBehavior === 'sand') {
@@ -102,8 +103,7 @@ export class PhysicsEngine {
     if (!state.activeTimers) state.activeTimers = [];
 
     const interval = setInterval(() => {
-      // Cancel timer if wave exits grid or user leaves sandbox mode
-      if (radius > state.gridSize * 1.5 || state.currentMode !== 'sandbox') {
+      if (radius > state.gridSize * 1.5) {
         clearInterval(interval);
         state.activeTimers = state.activeTimers.filter(t => t !== interval);
         return;

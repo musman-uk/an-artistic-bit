@@ -45,6 +45,9 @@ class AnArtisticBitApp {
     this.setupActiveCanvas();
     this.setupEventListeners();
 
+    this.mobileTab = 'draw';
+    this.setMobileTab('draw');
+
     requestAnimationFrame((t) => this.gameLoop(t));
   }
 
@@ -66,6 +69,7 @@ class AnArtisticBitApp {
 
   syncRestoredUI() {
     this.setSymmetry(this.state.symmetryMode, false);
+    this.setBehavior(this.state.currentBehavior);
     this.updateGridResolutionUI();
 
     const viewport = document.getElementById('hardware-viewport');
@@ -122,7 +126,7 @@ class AnArtisticBitApp {
       this.state.saveUndoState();
 
       const coords = this.getGridCoords(e);
-      if (coords && this.state.currentMode === 'studio' && this.state.currentTool === 'line') {
+      if (coords && this.state.currentBehavior !== 'wave' && this.state.currentTool === 'line') {
         this.state.lineStart = coords;
         this.state.lineEnd = coords;
       } else {
@@ -137,7 +141,7 @@ class AnArtisticBitApp {
         document.getElementById('status-coords').innerText = `X: ${coords.x}, Y: ${coords.y}${modeTag}`;
       }
       if (this.state.isMouseDown) {
-        if (this.state.currentMode === 'studio' && this.state.currentTool === 'line') {
+        if (this.state.currentBehavior !== 'wave' && this.state.currentTool === 'line') {
           this.state.lineEnd = coords;
         } else {
           this.handlePointerAction(e);
@@ -148,7 +152,7 @@ class AnArtisticBitApp {
     const handlePointerUp = (e) => {
       if (!this.state.isMouseDown) return;
 
-      if (this.state.currentMode === 'studio' && this.state.currentTool === 'line' && this.state.lineStart) {
+      if (this.state.currentBehavior !== 'wave' && this.state.currentTool === 'line' && this.state.lineStart) {
         const coords = this.getGridCoords(e) || this.state.lineEnd;
         if (coords) {
           const radius = this.state.showGridlines ? 0 : 1;
@@ -215,38 +219,32 @@ class AnArtisticBitApp {
     const isFreehand = !this.state.showGridlines;
     const prev = this.state.lastDrawCoord || coords;
 
-    if (this.state.currentMode === 'studio') {
-      if (this.state.currentTool === 'pencil') {
-        const radius = isFreehand ? 1 : 0;
-        DrawingTools.drawLine(prev.x, prev.y, x, y, this.state.currentColor, this.state, radius);
-        this.state.lastDrawCoord = coords;
-        this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled);
-      } else if (this.state.currentTool === 'eraser') {
-        const radius = isFreehand ? 4 : 0;
-        DrawingTools.drawLine(prev.x, prev.y, x, y, null, this.state, radius);
-        this.state.lastDrawCoord = coords;
-        this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled, 150);
-      } else if (this.state.currentTool === 'bucket') {
-        DrawingTools.floodFill(x, y, this.state.currentColor, this.state);
-        this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled, 380);
-        this.state.isMouseDown = false;
-        this.state.saveToStorage();
-      } else if (this.state.currentTool === 'picker') {
-        const picked = this.state.grid[y][x];
-        if (picked) this.setColor(picked);
-        this.state.isMouseDown = false;
-      }
-    } else if (this.state.currentMode === 'sandbox') {
-      if (['sand', 'glitch', 'bleed'].includes(this.state.currentBehavior)) {
-        const radius = isFreehand ? 2 : 0;
-        DrawingTools.drawLine(prev.x, prev.y, x, y, this.state.currentColor, this.state, radius);
-        this.state.lastDrawCoord = coords;
-        this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled);
-      } else if (this.state.currentBehavior === 'wave') {
-        PhysicsEngine.triggerEnergyWave(x, y, this.state);
-        this.synth.playSound('wave', this.state.activeTheme, this.state.audioEnabled);
-        this.state.isMouseDown = false;
-      }
+    if (this.state.currentBehavior === 'wave') {
+      PhysicsEngine.triggerEnergyWave(x, y, this.state);
+      this.synth.playSound('wave', this.state.activeTheme, this.state.audioEnabled);
+      this.state.isMouseDown = false;
+      return;
+    }
+
+    if (this.state.currentTool === 'pencil') {
+      const radius = isFreehand ? 1 : 0;
+      DrawingTools.drawLine(prev.x, prev.y, x, y, this.state.currentColor, this.state, radius);
+      this.state.lastDrawCoord = coords;
+      this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled);
+    } else if (this.state.currentTool === 'eraser') {
+      const radius = isFreehand ? 4 : 0;
+      DrawingTools.drawLine(prev.x, prev.y, x, y, null, this.state, radius);
+      this.state.lastDrawCoord = coords;
+      this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled, 150);
+    } else if (this.state.currentTool === 'bucket') {
+      DrawingTools.floodFill(x, y, this.state.currentColor, this.state);
+      this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled, 380);
+      this.state.isMouseDown = false;
+      this.state.saveToStorage();
+    } else if (this.state.currentTool === 'picker') {
+      const picked = this.state.grid[y][x];
+      if (picked) this.setColor(picked);
+      this.state.isMouseDown = false;
     }
   }
 
@@ -272,7 +270,7 @@ class AnArtisticBitApp {
       document.getElementById('status-fps').innerText = `FPS: ${this.state.fps}`;
     }
 
-    if (this.state.currentMode === 'sandbox' && !this.state.isReplaying) {
+    if (this.state.currentBehavior !== 'off' && !this.state.isReplaying) {
       PhysicsEngine.update(this.state, this.synth);
       if (timestamp - this.lastSandboxSave > 1500) {
         this.state.saveToStorage();
@@ -299,7 +297,7 @@ class AnArtisticBitApp {
       }
     }
 
-    if (this.state.currentMode === 'studio' && this.state.currentTool === 'line' && this.state.lineStart && this.state.lineEnd) {
+    if (this.state.currentBehavior !== 'wave' && this.state.currentTool === 'line' && this.state.lineStart && this.state.lineEnd) {
       this.ctx.strokeStyle = this.state.currentColor;
       this.ctx.lineWidth = this.state.showGridlines ? Math.max(1, cellSize * 0.8) : 2.5;
       this.ctx.lineCap = 'round';
@@ -404,28 +402,11 @@ class AnArtisticBitApp {
     setTimeout(() => this.resizeCanvas(), 50);
   }
 
-  setMode(mode) {
-    this.state.currentMode = mode;
-    const btnStudio = document.getElementById('btn-mode-studio');
-    const btnSandbox = document.getElementById('btn-mode-sandbox');
-    const panelStudio = document.getElementById('panel-studio-tools');
-    const panelSandbox = document.getElementById('panel-sandbox-tools');
-
-    if (mode === 'studio') {
-      btnStudio.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium transition flex items-center space-x-1.5 sm:space-x-2 theme-btn-accent';
-      btnSandbox.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium opacity-60 hover:opacity-100 transition flex items-center space-x-1.5 sm:space-x-2';
-      panelStudio.classList.remove('hidden');
-      panelSandbox.classList.add('hidden');
-    } else {
-      btnSandbox.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium transition flex items-center space-x-1.5 sm:space-x-2 theme-btn-accent';
-      btnStudio.className = 'px-2.5 sm:px-4 py-1.5 rounded-md text-xs font-medium opacity-60 hover:opacity-100 transition flex items-center space-x-1.5 sm:space-x-2';
-      panelSandbox.classList.remove('hidden');
-      panelStudio.classList.add('hidden');
-    }
-  }
-
   setTool(tool) {
     this.state.currentTool = tool;
+    if (this.state.currentBehavior === 'wave') {
+      this.setBehavior('off');
+    }
     document.querySelectorAll('.tool-btn').forEach(btn => {
       btn.className = 'tool-btn p-2 rounded-lg studio-well flex flex-col items-center justify-center space-y-1 transition';
     });
@@ -435,14 +416,41 @@ class AnArtisticBitApp {
     }
   }
 
-  setBehavior(behavior) {
-    this.state.currentBehavior = behavior;
-    document.querySelectorAll('.behavior-btn').forEach(btn => {
-      btn.classList.remove('studio-behavior-active');
+  setMobileTab(tab) {
+    this.mobileTab = tab;
+
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+      const isActive = btn.dataset.tab === tab;
+      btn.className = isActive
+        ? 'mobile-tab-btn flex-1 py-1.5 px-2 rounded-md text-[11px] font-medium studio-chip-active transition flex items-center justify-center space-x-1.5'
+        : 'mobile-tab-btn flex-1 py-1.5 px-2 rounded-md text-[11px] font-medium opacity-70 hover:opacity-100 transition flex items-center justify-center space-x-1.5';
     });
-    const active = document.getElementById(`behavior-${behavior}`);
-    if (active) {
-      active.classList.add('studio-behavior-active');
+
+    document.querySelectorAll('[data-sidebar-section]').forEach(section => {
+      const isMatch = section.dataset.sidebarSection === tab;
+      section.classList.toggle('hidden', !isMatch);
+      section.classList.add('md:block');
+    });
+
+    this.resizeCanvas();
+  }
+
+  setBehavior(behavior) {
+    const nextBehavior = (behavior !== 'off' && this.state.currentBehavior === behavior)
+      ? 'off'
+      : behavior;
+
+    this.state.currentBehavior = nextBehavior;
+
+    document.querySelectorAll('.behavior-btn').forEach(btn => {
+      btn.className = 'behavior-btn p-2 rounded-lg studio-well text-left transition flex items-center space-x-2';
+    });
+
+    if (nextBehavior !== 'off') {
+      const active = document.getElementById(`behavior-${nextBehavior}`);
+      if (active) {
+        active.className = 'behavior-btn p-2 rounded-lg studio-chip-active text-left transition flex items-center space-x-2';
+      }
     }
   }
 
@@ -462,6 +470,8 @@ class AnArtisticBitApp {
     this.state.currentColor = hex;
     document.getElementById('input-color-picker').value = hex;
     document.getElementById('label-hex-code').innerText = hex.toUpperCase();
+    const mobileDot = document.getElementById('mobile-ink-dot');
+    if (mobileDot) mobileDot.style.backgroundColor = hex;
     if (persist) this.state.saveToStorage();
   }
 
@@ -552,11 +562,6 @@ class AnArtisticBitApp {
     this.state.saveToStorage();
   }
 
-  setSimSpeed(val) {
-    this.state.simSpeed = parseFloat(val);
-    document.getElementById('label-sim-speed').innerText = `${this.state.simSpeed.toFixed(1)}x`;
-  }
-
   openModal(id) {
     document.getElementById(id).classList.remove('hidden');
   }
@@ -596,7 +601,7 @@ class AnArtisticBitApp {
 
   openSouvenirModal() {
     const stats = Exporter.calculateStats(this.state);
-    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Night Studio';
+    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Night';
     const modeLabel = this.state.showGridlines
       ? `${this.state.gridSize} x ${this.state.gridSize}`
       : `Freehand (${this.state.gridSize}x${this.state.gridSize})`;
@@ -623,7 +628,7 @@ class AnArtisticBitApp {
 
   downloadSouvenirCard() {
     const stats = Exporter.calculateStats(this.state);
-    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Night Studio';
+    const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Night';
     Exporter.renderSouvenirCard(
       this.canvas,
       housingTitle,
