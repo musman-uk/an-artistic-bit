@@ -256,7 +256,10 @@ body.theme-gbc .theme-header-title {
   font-family: '"Press Start 2P"', monospace;
   color: #a3e635;
   text-shadow: 2px 2px 0 #1a2e05;
-  font-size: 0.85rem;
+  font-size: clamp(0.6rem, 2.5vw, 0.85rem);
+}
+body.theme-gbc #btn-builders-byte-mobile {
+  font-size: 0.58rem;
 }
 
 .shell-gbc {
@@ -312,7 +315,7 @@ body.theme-tv .theme-btn-accent {
 body.theme-tv .theme-header-title {
   font-family: 'VT323', monospace;
   color: #22c55e;
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 4.5vw, 1.5rem);
   text-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
 }
 
@@ -368,6 +371,7 @@ body.theme-lenovo .theme-header-title {
   font-family: '"Fira Code"', monospace;
   color: #f8fafc;
   letter-spacing: -0.02em;
+  font-size: clamp(0.88rem, 3.4vw, 1.125rem);
 }
 
 .shell-lenovo {
@@ -461,6 +465,7 @@ body.theme-psp .theme-header-title {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #fafafa;
+  font-size: clamp(0.85rem, 3.2vw, 1.125rem);
 }
 
 .shell-psp {
@@ -568,11 +573,17 @@ body.theme-psp .theme-header-title {
 
 
 /* FOCUS / FULLSCREEN OVERRIDES */
+#hardware-viewport.focus-mode {
+  overflow: hidden !important;
+}
+#hardware-viewport.focus-mode > div {
+  height: 100%;
+  min-height: 0;
+}
 .focus-mode .shell-gbc,
 .focus-mode .shell-tv,
 .focus-mode .shell-lenovo,
-.focus-mode .shell-psp,
-.focus-mode #shell-studio {
+.focus-mode .shell-psp {
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
@@ -599,19 +610,27 @@ body.theme-psp .theme-header-title {
   margin: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
-.focus-mode .canvas-container {
+.focus-mode #shell-studio {
   border: none !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  width: 100% !important;
+  width: auto !important;
   height: 100% !important;
   max-width: 100% !important;
   max-height: 100% !important;
 }
-.focus-mode canvas {
-  border-radius: 0 !important;
+.focus-mode .hw-screen-box {
+  border: 1px solid var(--studio-border) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+  width: auto !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
 }
 .focus-mode .shell-hardware-el,
 .focus-mode .screen-glare,
