@@ -38,7 +38,7 @@ A simplified view of how the website is being developed:
 
 ## Status
 
-Version `1.0.0` – Unpublished  
+Version `1.0.0` – Published  
 
 ---
 
