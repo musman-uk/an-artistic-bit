@@ -1,15 +1,34 @@
 import { AppState, FREEHAND_RESOLUTION } from './state.js';
-import { ThemeManager, PALETTES, THEME_TITLES } from './themes.js';
+import { ThemeManager, PALETTES, THEME_TITLES, SOUVENIR_THEMES } from './themes.js';
 import { SynthAudio } from './synth.js';
 import { DrawingTools } from './tools.js';
 import { PhysicsEngine } from './physics.js';
 import { Exporter } from './exporter.js';
+
+const FALLBACK_CURSORS = {
+  pencil: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'%3E%3Cpath d='M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z' fill='%23ffffff' stroke='%230f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 2 20, auto`,
+  line: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'%3E%3Cline x1='4' y1='4' x2='20' y2='20' stroke='%230f172a' stroke-width='5' stroke-linecap='round'/%3E%3Cline x1='4' y1='4' x2='20' y2='20' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") 11 11, crosshair`,
+  bucket: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'%3E%3Cpath d='m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z' fill='%23ffffff' stroke='%230f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M21 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z' fill='%23ffffff' stroke='%230f172a' stroke-width='1.8'/%3E%3C/svg%3E") 19 20, auto`,
+  eraser: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'%3E%3Cpath d='m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21Z' fill='%23ffffff' stroke='%230f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M22 21H7' stroke='%230f172a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") 4 19, auto`
+};
+
+const FA_GLYPH_SPECS = {
+  pencil: { glyph: '\uf303', hx: 5, hy: 23, fallback: 'auto' },
+  line: { glyph: '\uf715', hx: 14, hy: 14, fallback: 'crosshair' },
+  bucket: { glyph: '\uf576', hx: 22, hy: 23, fallback: 'auto' },
+  eraser: { glyph: '\uf12d', hx: 6, hy: 22, fallback: 'auto' }
+};
 
 class AnArtisticBitApp {
   constructor() {
     this.state = new AppState();
     this.synth = new SynthAudio();
     this.lastSandboxSave = 0;
+    this.strokePoints = [];
+    this.lastPaintSoundTime = 0;
+    this.bufferCanvas = null;
+    this.bufferCtx = null;
+    this.toolCursors = { ...FALLBACK_CURSORS };
 
     const restored = this.state.loadFromStorage();
     if (!restored) {
@@ -44,11 +63,50 @@ class AnArtisticBitApp {
     this.setupSystemSchemeListener();
     this.setupActiveCanvas();
     this.setupEventListeners();
+    this.updateGridResolutionUI();
+    this.setTool(this.state.currentTool);
+    this.initExactFontAwesomeCursors();
 
     this.mobileTab = 'draw';
     this.setMobileTab('draw');
 
     requestAnimationFrame((t) => this.gameLoop(t));
+  }
+
+  async initExactFontAwesomeCursors() {
+    if (!document.fonts) return;
+    try {
+      await document.fonts.load('900 18px "Font Awesome 6 Free"');
+      await document.fonts.ready;
+    } catch (_) {
+      return;
+    }
+
+    if (!document.fonts.check('900 18px "Font Awesome 6 Free"')) return;
+
+    const size = 28;
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    const ctx = c.getContext('2d');
+
+    Object.entries(FA_GLYPH_SPECS).forEach(([tool, spec]) => {
+      ctx.clearRect(0, 0, size, size);
+      ctx.font = '900 17px "Font Awesome 6 Free"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#0f172a';
+      ctx.strokeText(spec.glyph, size / 2, size / 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(spec.glyph, size / 2, size / 2);
+
+      const url = c.toDataURL('image/png');
+      this.toolCursors[tool] = `url("${url}") ${spec.hx} ${spec.hy}, ${spec.fallback}`;
+    });
+
+    this.setTool(this.state.currentTool);
   }
 
   setupSystemSchemeListener() {
@@ -100,6 +158,7 @@ class AnArtisticBitApp {
 
     if (this.canvas) {
       this.ctx = this.canvas.getContext('2d', { alpha: true });
+      this.setTool(this.state.currentTool);
       this.resizeCanvas();
     }
   }
@@ -109,10 +168,11 @@ class AnArtisticBitApp {
     const container = this.canvas.parentElement;
     const rect = container.getBoundingClientRect();
     const size = Math.floor(Math.min(rect.width, rect.height));
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     if (size > 0) {
-      this.canvas.width = size;
-      this.canvas.height = size;
+      this.canvas.width = Math.round(size * dpr);
+      this.canvas.height = Math.round(size * dpr);
       this.renderCanvas();
     }
   }
@@ -121,8 +181,11 @@ class AnArtisticBitApp {
     window.addEventListener('resize', () => this.resizeCanvas());
 
     const handlePointerDown = (e) => {
+      if (e.cancelable) e.preventDefault();
       this.state.isMouseDown = true;
       this.state.lastDrawCoord = null;
+      this.strokePoints = [];
+      this.lastPaintSoundTime = 0;
       this.state.saveUndoState();
 
       const coords = this.getGridCoords(e);
@@ -144,7 +207,12 @@ class AnArtisticBitApp {
         if (this.state.currentBehavior !== 'wave' && this.state.currentTool === 'line') {
           this.state.lineEnd = coords;
         } else {
-          this.handlePointerAction(e);
+          const events = (typeof e.getCoalescedEvents === 'function' && e.getCoalescedEvents().length)
+            ? e.getCoalescedEvents()
+            : [e];
+          for (const ev of events) {
+            this.handlePointerAction(ev);
+          }
         }
       }
     };
@@ -152,10 +220,20 @@ class AnArtisticBitApp {
     const handlePointerUp = (e) => {
       if (!this.state.isMouseDown) return;
 
+      const freehandRadius = 2.2;
+
+      if (!this.state.showGridlines && this.state.currentTool === 'pencil' && this.strokePoints.length >= 2) {
+        const len = this.strokePoints.length;
+        const p1 = this.strokePoints[len - 2];
+        const p2 = this.strokePoints[len - 1];
+        const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+        DrawingTools.drawSmoothSegment(mid, p2, this.state.currentColor, this.state, freehandRadius);
+      }
+
       if (this.state.currentBehavior !== 'wave' && this.state.currentTool === 'line' && this.state.lineStart) {
         const coords = this.getGridCoords(e) || this.state.lineEnd;
         if (coords) {
-          const radius = this.state.showGridlines ? 0 : 1;
+          const radius = this.state.showGridlines ? 0 : freehandRadius;
           DrawingTools.drawLine(
             this.state.lineStart.x,
             this.state.lineStart.y,
@@ -173,6 +251,7 @@ class AnArtisticBitApp {
 
       this.state.isMouseDown = false;
       this.state.lastDrawCoord = null;
+      this.strokePoints = [];
       this.state.saveToStorage();
     };
 
@@ -198,11 +277,13 @@ class AnArtisticBitApp {
 
     if (clientX === undefined || clientY === undefined) return null;
 
-    const x = Math.floor(((clientX - rect.left) / rect.width) * this.state.gridSize);
-    const y = Math.floor(((clientY - rect.top) / rect.height) * this.state.gridSize);
+    const fx = ((clientX - rect.left) / rect.width) * this.state.gridSize;
+    const fy = ((clientY - rect.top) / rect.height) * this.state.gridSize;
+    const x = Math.floor(fx);
+    const y = Math.floor(fy);
 
     if (x >= 0 && x < this.state.gridSize && y >= 0 && y < this.state.gridSize) {
-      return { x, y };
+      return { x, y, fx, fy };
     }
     return null;
   }
@@ -215,8 +296,9 @@ class AnArtisticBitApp {
       return;
     }
 
-    const { x, y } = coords;
+    const { x, y, fx, fy } = coords;
     const isFreehand = !this.state.showGridlines;
+    const freehandRadius = 2.2;
     const prev = this.state.lastDrawCoord || coords;
 
     if (this.state.currentBehavior === 'wave') {
@@ -227,15 +309,44 @@ class AnArtisticBitApp {
     }
 
     if (this.state.currentTool === 'pencil') {
-      const radius = isFreehand ? 1 : 0;
-      DrawingTools.drawLine(prev.x, prev.y, x, y, this.state.currentColor, this.state, radius);
+      if (isFreehand) {
+        const pts = this.strokePoints;
+        const last = pts[pts.length - 1];
+        if (!last || Math.hypot(fx - last.x, fy - last.y) >= 0.75) {
+          pts.push({ x: fx, y: fy });
+          if (pts.length === 1) {
+            DrawingTools.stampNib(x, y, this.state.currentColor, freehandRadius, this.state);
+          } else if (pts.length === 2) {
+            const mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+            DrawingTools.drawSmoothSegment(pts[0], mid, this.state.currentColor, this.state, freehandRadius);
+          } else {
+            const p0 = pts[pts.length - 3];
+            const p1 = pts[pts.length - 2];
+            const p2 = pts[pts.length - 1];
+            const mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+            const mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+            DrawingTools.drawQuadraticCurve(mid1, p1, mid2, this.state.currentColor, this.state, freehandRadius);
+          }
+        }
+      } else {
+        DrawingTools.drawLine(prev.x, prev.y, x, y, this.state.currentColor, this.state, 0);
+      }
+
       this.state.lastDrawCoord = coords;
-      this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled);
+      const now = performance.now();
+      if (now - this.lastPaintSoundTime > 35) {
+        this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled);
+        this.lastPaintSoundTime = now;
+      }
     } else if (this.state.currentTool === 'eraser') {
       const radius = isFreehand ? 4 : 0;
       DrawingTools.drawLine(prev.x, prev.y, x, y, null, this.state, radius);
       this.state.lastDrawCoord = coords;
-      this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled, 150);
+      const now = performance.now();
+      if (now - this.lastPaintSoundTime > 35) {
+        this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled, 150);
+        this.lastPaintSoundTime = now;
+      }
     } else if (this.state.currentTool === 'bucket') {
       DrawingTools.floodFill(x, y, this.state.currentColor, this.state);
       this.synth.playSound('paint', this.state.activeTheme, this.state.audioEnabled, 380);
@@ -285,21 +396,38 @@ class AnArtisticBitApp {
   renderCanvas() {
     if (!this.ctx || !this.canvas) return;
     const cellSize = this.canvas.width / this.state.gridSize;
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const isFreehand = !this.state.showGridlines;
+
+    if (!this.bufferCanvas) {
+      this.bufferCanvas = document.createElement('canvas');
+      this.bufferCtx = this.bufferCanvas.getContext('2d');
+    }
+
+    if (this.bufferCanvas.width !== this.state.gridSize) {
+      this.bufferCanvas.width = this.state.gridSize;
+      this.bufferCanvas.height = this.state.gridSize;
+    }
+
+    this.bufferCtx.clearRect(0, 0, this.state.gridSize, this.state.gridSize);
 
     for (let y = 0; y < this.state.gridSize; y++) {
       for (let x = 0; x < this.state.gridSize; x++) {
         const color = this.state.grid[y][x];
         if (color) {
-          this.ctx.fillStyle = color;
-          this.ctx.fillRect(x * cellSize, y * cellSize, Math.ceil(cellSize), Math.ceil(cellSize));
+          this.bufferCtx.fillStyle = color;
+          this.bufferCtx.fillRect(x, y, 1, 1);
         }
       }
     }
 
+    this.canvas.style.imageRendering = isFreehand ? 'auto' : 'pixelated';
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.imageSmoothingEnabled = isFreehand;
+    this.ctx.drawImage(this.bufferCanvas, 0, 0, this.canvas.width, this.canvas.height);
+
     if (this.state.currentBehavior !== 'wave' && this.state.currentTool === 'line' && this.state.lineStart && this.state.lineEnd) {
       this.ctx.strokeStyle = this.state.currentColor;
-      this.ctx.lineWidth = this.state.showGridlines ? Math.max(1, cellSize * 0.8) : 2.5;
+      this.ctx.lineWidth = this.state.showGridlines ? Math.max(1, cellSize * 0.8) : Math.max(2, cellSize * 4.4);
       this.ctx.lineCap = 'round';
       this.ctx.beginPath();
       this.ctx.moveTo((this.state.lineStart.x + 0.5) * cellSize, (this.state.lineStart.y + 0.5) * cellSize);
@@ -414,6 +542,10 @@ class AnArtisticBitApp {
     if (active) {
       active.className = 'tool-btn p-2 rounded-lg studio-chip-active flex flex-col items-center justify-center space-y-1 transition';
     }
+    const cursor = this.toolCursors[tool] || this.toolCursors.pencil;
+    document.querySelectorAll('canvas').forEach(cvs => {
+      cvs.style.cursor = cursor;
+    });
   }
 
   setMobileTab(tab) {
@@ -602,26 +734,73 @@ class AnArtisticBitApp {
   openSouvenirModal() {
     const stats = Exporter.calculateStats(this.state);
     const housingTitle = THEME_TITLES[this.state.activeTheme] || 'Night';
+    const themeStyle = SOUVENIR_THEMES[this.state.activeTheme] || SOUVENIR_THEMES.night;
     const modeLabel = this.state.showGridlines
       ? `${this.state.gridSize} x ${this.state.gridSize}`
       : `Freehand (${this.state.gridSize}x${this.state.gridSize})`;
 
-    const previewBox = document.getElementById('souvenir-preview-box');
-    if (previewBox) {
-      previewBox.className = this.state.activeTheme === 'day'
-        ? 'p-3 bg-[#faf8f5] border border-slate-700 rounded-lg shadow-inner'
-        : 'p-3 bg-slate-900 border border-slate-800 rounded-lg shadow-inner';
+    const cardContainer = document.getElementById('souvenir-card-container');
+    if (cardContainer) {
+      cardContainer.style.backgroundColor = themeStyle.cardBg;
+      cardContainer.style.borderColor = themeStyle.border;
+      cardContainer.style.color = themeStyle.text;
+      cardContainer.style.fontFamily = themeStyle.bodyFont;
     }
 
+    const headerBar = document.getElementById('souvenir-card-header');
+    if (headerBar) {
+      headerBar.style.borderColor = themeStyle.border;
+    }
+
+    const titleDot = document.getElementById('souvenir-title-dot');
+    if (titleDot) {
+      titleDot.style.backgroundColor = themeStyle.accent;
+    }
+
+    const cardTitle = document.getElementById('souvenir-card-title');
+    if (cardTitle) {
+      const displayHousing = themeStyle.headerUppercase ? housingTitle.toUpperCase() : housingTitle;
+      const baseTitle = themeStyle.headerUppercase ? 'AN ARTISTIC BIT' : 'An Artistic Bit';
+      cardTitle.innerText = `${baseTitle} • ${displayHousing}`;
+      cardTitle.style.fontFamily = themeStyle.headerFont;
+      cardTitle.style.letterSpacing = themeStyle.headerLetterSpacing;
+      cardTitle.className = themeStyle.modalTitleClass;
+    }
+
+    const timestampEl = document.getElementById('souvenir-timestamp');
+    if (timestampEl) {
+      timestampEl.innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
+      timestampEl.style.color = themeStyle.muted;
+      timestampEl.className = `${themeStyle.modalMetaClass} shrink-0`;
+    }
+
+    const previewBox = document.getElementById('souvenir-preview-box');
+    if (previewBox) {
+      previewBox.style.backgroundColor = themeStyle.screenBg;
+      previewBox.style.borderColor = themeStyle.screenBorder;
+    }
+
+    document.querySelectorAll('#souvenir-card-container .souvenir-stat-box').forEach(box => {
+      box.style.backgroundColor = themeStyle.wellBg;
+      box.style.borderColor = themeStyle.border;
+    });
+
+    document.querySelectorAll('#souvenir-card-container .souvenir-stat-label').forEach(lbl => {
+      lbl.style.color = themeStyle.muted;
+      lbl.className = `souvenir-stat-label ${themeStyle.modalLabelClass}`;
+    });
+
+    document.querySelectorAll('#souvenir-card-container .souvenir-stat-value').forEach(val => {
+      val.style.color = themeStyle.text;
+      val.className = `souvenir-stat-value ${themeStyle.modalValueClass}`;
+    });
+
     document.getElementById('souvenir-preview-img').src = this.canvas.toDataURL();
-    document.getElementById('souvenir-housing').innerText = housingTitle;
-    document.getElementById('souvenir-card-title').innerText = `AN ARTISTIC BIT • ${housingTitle.toUpperCase()}`;
     document.getElementById('souvenir-pixels').innerText = stats.activePixels;
     document.getElementById('souvenir-entropy').innerText = `${stats.entropy.toFixed(2)} bits`;
     document.getElementById('souvenir-res').innerText = modeLabel;
     document.getElementById('souvenir-dominant-hex').innerText = stats.dominantColor.toUpperCase();
     document.getElementById('souvenir-dominant-swatch').style.backgroundColor = stats.dominantColor;
-    document.getElementById('souvenir-timestamp').innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
     this.openModal('modal-souvenir');
   }
@@ -634,6 +813,7 @@ class AnArtisticBitApp {
       housingTitle,
       stats.activePixels,
       stats.entropy,
+      stats.dominantColor,
       this.state.gridSize,
       this.state.showGridlines,
       this.state.activeTheme

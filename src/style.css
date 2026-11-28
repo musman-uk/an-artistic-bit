@@ -343,9 +343,9 @@ body.theme-lenovo {
   --studio-control-bg: #343840;
   --studio-control-hover: #404550;
   --studio-border: #4e5461;
-  --studio-accent: #e11d48;
-  --studio-accent-fg: #ffffff;
-  --studio-accent-border: #fb7185;
+  --studio-accent: #cbd5e1;
+  --studio-accent-fg: #0f172a;
+  --studio-accent-border: #f1f5f9;
   --studio-status-accent: #38bdf8;
 
   font-family: '"Fira Code"', monospace;
@@ -361,11 +361,11 @@ body.theme-lenovo input {
   font-family: '"Fira Code"', monospace;
 }
 body.theme-lenovo .theme-btn-accent {
-  background: #e11d48;
-  color: #ffffff;
+  background: #cbd5e1;
+  color: #0f172a;
   font-weight: 700;
-  border: 1px solid #fb7185;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.35);
+  border: 1px solid #f1f5f9;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 body.theme-lenovo .theme-header-title {
   font-family: '"Fira Code"', monospace;
@@ -462,8 +462,7 @@ body.theme-psp .theme-btn-accent {
 }
 body.theme-psp .theme-header-title {
   font-family: 'Space Grotesk', sans-serif;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: #fafafa;
   font-size: clamp(0.85rem, 3.2vw, 1.125rem);
 }

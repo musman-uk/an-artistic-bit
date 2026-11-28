@@ -1,3 +1,5 @@
+import { SOUVENIR_THEMES } from './themes.js';
+
 export class Exporter {
   static calculateStats(state) {
     let activePixels = 0;
@@ -86,50 +88,131 @@ export class Exporter {
     a.click();
   }
 
-  static renderSouvenirCard(sourceCanvas, housingTitle, activePixels, entropy, gridSize, showGridlines = true, activeTheme = 'night') {
+  static async renderSouvenirCard(
+    sourceCanvas,
+    housingTitle,
+    activePixels,
+    entropy,
+    dominantColor = '#6366F1',
+    gridSize = 256,
+    showGridlines = false,
+    activeTheme = 'night'
+  ) {
+    const themeStyle = SOUVENIR_THEMES[activeTheme] || SOUVENIR_THEMES.night;
+
+    if (document.fonts) {
+      await Promise.allSettled([
+        document.fonts.load(themeStyle.fontLoadSpec),
+        document.fonts.load(themeStyle.bodyFontLoadSpec)
+      ]);
+    }
+
     const offCanvas = document.createElement('canvas');
     offCanvas.width = 600;
-    offCanvas.height = 720;
+    offCanvas.height = 700;
     const ctx = offCanvas.getContext('2d');
     const w = offCanvas.width;
     const h = offCanvas.height;
 
-    ctx.fillStyle = '#0e1117';
+    // Outer theme card surface & border
+    ctx.fillStyle = themeStyle.cardBg;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = themeStyle.border;
+    ctx.lineWidth = 2;
     ctx.strokeRect(20, 20, w - 40, h - 40);
 
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 24px "Fraunces", "Space Grotesk", serif';
-    ctx.fillText('AN ARTISTIC BIT', 40, 65);
+    // Header bar
+    const displayHousing = themeStyle.headerUppercase ? housingTitle.toUpperCase() : housingTitle;
+    const baseTitle = themeStyle.headerUppercase ? 'AN ARTISTIC BIT' : 'An Artistic Bit';
+    const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '13px "Fira Code", monospace';
-    ctx.fillText(`HARDWARE THEME : ${housingTitle.toUpperCase()}`, 40, 92);
+    ctx.fillStyle = themeStyle.accent;
+    ctx.fillRect(42, 48, 10, 10);
 
-    const size = 360;
-    const x = (w - size) / 2;
-    const y = 120;
+    ctx.fillStyle = themeStyle.text;
+    ctx.font = themeStyle.pngTitleFont;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${baseTitle} • ${displayHousing}`, 62, 54);
 
-    ctx.fillStyle = activeTheme === 'day' ? '#faf8f5' : '#090d16';
-    ctx.fillRect(x - 10, y - 10, size + 20, size + 20);
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x - 10, y - 10, size + 20, size + 20);
+    ctx.fillStyle = themeStyle.muted;
+    ctx.font = themeStyle.pngDateFont;
+    ctx.textAlign = 'right';
+    ctx.fillText(dateStr, w - 42, 54);
 
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(sourceCanvas, x, y, size, size);
+    ctx.strokeStyle = themeStyle.border;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(40, 82);
+    ctx.lineTo(w - 40, 82);
+    ctx.stroke();
 
-    const resLabel = showGridlines ? `${gridSize} x ${gridSize} GRID` : `FREEHAND (${gridSize}x${gridSize})`;
+    // Focus Mode screen box & artwork
+    const screenSize = 350;
+    const screenX = (w - screenSize) / 2;
+    const screenY = 108;
 
-    ctx.fillStyle = '#a3e635';
-    ctx.font = '14px "Fira Code", monospace';
-    ctx.fillText(`ACTIVE PIXELS  : ${activePixels}`, 50, 530);
-    ctx.fillText(`ENTROPY SCORE  : ${entropy.toFixed(2)} bits`, 50, 560);
-    ctx.fillText(`CANVAS MODE    : ${resLabel}`, 50, 590);
-    ctx.fillText(`TIMESTAMP      : ${new Date().toISOString().slice(0, 10)}`, 50, 620);
+    ctx.fillStyle = themeStyle.screenBg;
+    ctx.fillRect(screenX, screenY, screenSize, screenSize);
+
+    ctx.imageSmoothingEnabled = !showGridlines;
+    ctx.drawImage(sourceCanvas, screenX, screenY, screenSize, screenSize);
+
+    ctx.strokeStyle = themeStyle.screenBorder;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(screenX, screenY, screenSize, screenSize);
+
+    // 2x2 Theme-matched stat grid
+    const resLabel = showGridlines
+      ? `${gridSize} x ${gridSize}`
+      : `Freehand (${gridSize}x${gridSize})`;
+
+    const cards = [
+      { label: 'ACTIVE PIXELS', value: String(activePixels) },
+      { label: 'CANVAS MODE', value: resLabel },
+      { label: 'DOMINANT HUE', value: dominantColor.toUpperCase(), swatch: dominantColor },
+      { label: 'ENTROPY SCORE', value: `${entropy.toFixed(2)} bits` }
+    ];
+
+    const gridX = 42;
+    const gridY = 486;
+    const gap = 14;
+    const boxW = (w - gridX * 2 - gap) / 2;
+    const boxH = 78;
+
+    cards.forEach((item, idx) => {
+      const col = idx % 2;
+      const row = Math.floor(idx / 2);
+      const bx = gridX + col * (boxW + gap);
+      const by = gridY + row * (boxH + gap);
+
+      ctx.fillStyle = themeStyle.wellBg;
+      ctx.fillRect(bx, by, boxW, boxH);
+
+      ctx.strokeStyle = themeStyle.border;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx, by, boxW, boxH);
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = themeStyle.muted;
+      ctx.font = themeStyle.pngLabelFont;
+      ctx.fillText(item.label, bx + 16, by + 16);
+
+      ctx.fillStyle = themeStyle.text;
+      ctx.font = themeStyle.pngValueFont;
+      if (item.swatch) {
+        ctx.beginPath();
+        ctx.arc(bx + 22, by + 48, 6, 0, Math.PI * 2);
+        ctx.fillStyle = item.swatch;
+        ctx.fill();
+        ctx.fillStyle = themeStyle.text;
+        ctx.fillText(item.value, bx + 36, by + 40);
+      } else {
+        ctx.fillText(item.value, bx + 16, by + 40);
+      }
+    });
 
     const a = document.createElement('a');
     a.download = `An-Artistic-Bit-Souvenir-${Date.now()}.png`;

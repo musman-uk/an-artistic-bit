@@ -30,9 +30,11 @@ export class DrawingTools {
       return;
     }
 
-    for (let dy = -radius; dy <= radius; dy++) {
-      for (let dx = -radius; dx <= radius; dx++) {
-        if (dx * dx + dy * dy <= radius * radius + 0.5) {
+    const bound = Math.ceil(radius);
+    const rSq = radius * radius;
+    for (let dy = -bound; dy <= bound; dy++) {
+      for (let dx = -bound; dx <= bound; dx++) {
+        if (dx * dx + dy * dy <= rSq) {
           DrawingTools.applyPixelWithSymmetry(cx + dx, cy + dy, color, state);
         }
       }
@@ -67,6 +69,43 @@ export class DrawingTools {
     }
   }
 
+  static drawSmoothSegment(p0, p1, color, state, radius = 2.2) {
+    const dist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+    const steps = Math.max(1, Math.ceil(dist * 3));
+    let lastX = -1;
+    let lastY = -1;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const x = Math.round(p0.x + (p1.x - p0.x) * t);
+      const y = Math.round(p0.y + (p1.y - p0.y) * t);
+      if (x !== lastX || y !== lastY) {
+        DrawingTools.stampNib(x, y, color, radius, state);
+        lastX = x;
+        lastY = y;
+      }
+    }
+  }
+
+  static drawQuadraticCurve(p0, p1, p2, color, state, radius = 2.2) {
+    const dist = Math.hypot(p1.x - p0.x, p1.y - p0.y) + Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const steps = Math.max(1, Math.ceil(dist * 3));
+    let lastX = -1;
+    let lastY = -1;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const inv = 1 - t;
+      const x = Math.round(inv * inv * p0.x + 2 * inv * t * p1.x + t * t * p2.x);
+      const y = Math.round(inv * inv * p0.y + 2 * inv * t * p1.y + t * t * p2.y);
+      if (x !== lastX || y !== lastY) {
+        DrawingTools.stampNib(x, y, color, radius, state);
+        lastX = x;
+        lastY = y;
+      }
+    }
+  }
+
   static floodFill(startX, startY, targetColor, state) {
     if (startX < 0 || startX >= state.gridSize || startY < 0 || startY >= state.gridSize) return;
 
@@ -76,6 +115,7 @@ export class DrawingTools {
     // Index-pointer BFS queue for fast O(n) execution even in 256x256 freehand mode
     const queue = [{ x: startX, y: startY }];
     const visited = new Uint8Array(state.gridSize * state.gridSize);
+    const region = [];
     let head = 0;
 
     while (head < queue.length) {
@@ -87,13 +127,17 @@ export class DrawingTools {
       visited[flatIdx] = 1;
 
       if (state.grid[y][x] === startColor) {
-        DrawingTools.applyPixelWithSymmetry(x, y, targetColor, state);
+        region.push({ x, y });
 
         queue.push({ x: x + 1, y });
         queue.push({ x: x - 1, y });
         queue.push({ x, y: y + 1 });
         queue.push({ x, y: y - 1 });
       }
+    }
+
+    for (const pt of region) {
+      DrawingTools.applyPixelWithSymmetry(pt.x, pt.y, targetColor, state);
     }
   }
 }

@@ -3,7 +3,7 @@ export const FREEHAND_RESOLUTION = 256;
 
 export class AppState {
   constructor() {
-    this.gridSize = 32;
+    this.gridSize = FREEHAND_RESOLUTION;
     this.lastGridResolution = 32;
     this.currentMode = 'studio';
     this.currentTool = 'pencil'; // 'pencil' | 'line' | 'bucket' | 'eraser' | 'picker'
@@ -11,7 +11,7 @@ export class AppState {
     this.symmetryMode = 'off'; // 'off' | 'x' | 'y' | 'quad'
     this.currentColor = '#6366f1';
     this.simSpeed = 1.0;
-    this.showGridlines = true;
+    this.showGridlines = false;
     this.crtEnabled = false;
     this.audioEnabled = true;
     this.activeTheme = 'night'; // 'night' | 'day' | 'gbc' | 'tv' | 'lenovo' | 'psp'
@@ -148,7 +148,7 @@ export class AppState {
 
       this.gridSize = data.gridSize;
       this.lastGridResolution = [16, 32, 48].includes(data.lastGridResolution) ? data.lastGridResolution : 32;
-      this.showGridlines = typeof data.showGridlines === 'boolean' ? data.showGridlines : true;
+      this.showGridlines = typeof data.showGridlines === 'boolean' ? data.showGridlines : false;
 
       let resolvedTheme = data.activeTheme || 'night';
       if (resolvedTheme === 'midnight') resolvedTheme = 'night';
