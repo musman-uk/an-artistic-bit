@@ -63,7 +63,7 @@
 
 ## 4. Version History
 
-### v1.0.0 - Unpublished
+### v1.0.0 - Published
 - Complete ES module architecture split across state, themes, synth, tools, physics, and exporter components  
 - Integrated `Night`, `Day`, and 4 retro hardware display themes (`Game Boy Color-Style`, `14" CRT Philips-Style`, `11" Lenovo-Style`, `PSP-Style`) with 8 preset palettes, dynamic SVG favicons, and toggleable CRT scanline overlays  
 - Built unified drawing suite with pencil, line, flood fill, eraser, 4-way symmetry, `256x256` Freehand mode, `localStorage` auto-save, and multi-step undo capabilities  
