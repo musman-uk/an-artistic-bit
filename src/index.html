@@ -64,14 +64,14 @@
     <!-- Controls: Full-Width Theme on Phones, Utility Buttons Below Theme -->
     <div class="w-full lg:w-auto flex flex-col md:flex-row items-stretch md:items-center justify-between lg:justify-end gap-2">
       <div class="w-full md:flex-1 lg:flex-initial min-w-0 flex items-center space-x-1.5 studio-well px-2 py-1 rounded-lg">
-        <label for="select-theme" class="text-[10px] font-code uppercase tracking-wider opacity-65 shrink-0">Theme</label>
+        <label for="select-theme" class="text-[10px] font-code opacity-65 shrink-0">Theme</label>
         <select id="select-theme" onchange="app.setTheme(this.value)" class="studio-control text-xs rounded-md px-2 py-1 cursor-pointer focus:outline-none w-full lg:w-52 min-w-0">
-          <option value="night">Night</option>
           <option value="day">Day</option>
+          <option value="night">Night</option>
           <option value="gbc">Game Boy Color-Style</option>
           <option value="tv">14" CRT Philips-Style</option>
-          <option value="lenovo">11" Lenovo-Style</option>
           <option value="psp">PSP-Style</option>
+          <option value="lenovo">11" Lenovo-Style</option>
         </select>
       </div>
 
@@ -200,7 +200,7 @@
               <i class="fa-solid fa-fire-flame-curved text-[10px]"></i>
             </div>
             <div class="min-w-0">
-              <div class="text-[11px] font-bold truncate">Bleed</div>
+              <div class="text-[11px] font-bold truncate">Ember</div>
               <div class="text-[9px] opacity-65 truncate">Heat diffuse</div>
             </div>
           </button>
@@ -222,21 +222,21 @@
         <div class="flex justify-between items-center">
           <label class="text-[10px] font-code opacity-65">Palette</label>
           <select id="select-preset-palette" onchange="app.loadPalettePreset(this.value)" class="studio-control text-[10px] rounded px-2 py-0.5 focus:outline-none">
+            <option value="day">Daylight Paper</option>
             <option value="night">Midnight Neon</option>
-            <option value="day">Studio Paper</option>
-            <option value="gbc">GBC Olive</option>
-            <option value="arcade">Arcade Classics</option>
-            <option value="office">Office Slate</option>
-            <option value="psp">Piano Gloss</option>
-            <option value="pastel">Paper Pastel</option>
-            <option value="monochrome">Phosphor Matrix</option>
+            <option value="gbc">Gameboy Arcade</option>
+            <option value="arcade">CRT Retro</option>
+            <option value="psp">PSP Gloss</option>
+            <option value="office">Lenovo Slate</option>
+            <option value="pastel">Pastel</option>
+            <option value="monochrome">Cyber</option>
           </select>
         </div>
 
         <div id="palette-swatches" class="grid grid-cols-8 gap-1.5 p-2 studio-well rounded-lg"></div>
 
         <div class="flex items-center justify-between studio-well p-2 rounded-lg">
-          <span class="text-xs font-code opacity-80">Ink</span>
+          <span class="text-xs font-code opacity-80">Colour</span>
           <div class="flex items-center space-x-2">
             <input type="color" id="input-color-picker" value="#6366f1" onchange="app.setColor(this.value)" class="w-7 h-7 rounded cursor-pointer bg-transparent border-0" />
             <span id="label-hex-code" class="text-xs font-code">#6366F1</span>
@@ -250,7 +250,7 @@
           <label class="text-[10px] font-code opacity-70">Grid Size</label>
           <div class="flex items-center space-x-1">
             <button onclick="app.setGridSize(16)" id="grid-size-16" class="px-2 py-0.5 rounded text-xs studio-well opacity-70 hover:opacity-100 transition">16x16</button>
-            <button onclick="app.setGridSize(32)" id="grid-size-32" class="px-2 py-0.5 rounded text-xs studio-chip-active transition">32x32</button>
+            <button onclick="app.setGridSize(32)" id="grid-size-32" class="px-2 py-0.5 rounded text-xs studio-well opacity-70 hover:opacity-100 transition">32x32</button>
             <button onclick="app.setGridSize(48)" id="grid-size-48" class="px-2 py-0.5 rounded text-xs studio-well opacity-70 hover:opacity-100 transition">48x48</button>
           </div>
         </div>
@@ -258,7 +258,7 @@
         <div class="flex items-center justify-between">
           <span class="text-[10px] font-code opacity-70">Gridlines</span>
           <button id="btn-toggle-gridlines" onclick="app.toggleGridlines()" class="px-2.5 py-0.5 rounded studio-control text-xs font-code font-semibold studio-accent-text">
-            On
+            Off
           </button>
         </div>
 
@@ -284,7 +284,7 @@
         <!-- TIER 1 — THEME 1 & 2: NIGHT / DAY -->
         <div id="shell-studio" class="studio-shell-box aspect-square flex flex-col items-center justify-center p-2.5 lg:p-3.5 studio-frame rounded-xl shadow-2xl relative canvas-container crt-screen-wrapper">
           <div class="screen-glare"></div>
-          <canvas id="canvas-studio" class="w-full h-full object-contain cursor-crosshair rounded-lg studio-canvas-well"></canvas>
+          <canvas id="canvas-studio" class="w-full h-full object-contain rounded-lg studio-canvas-well"></canvas>
         </div>
 
         <!-- TIER 2 — THEME 3: GAME BOY COLOR-STYLE (Purely Decorative Shell) -->
@@ -299,7 +299,7 @@
 
             <div class="canvas-container crt-screen-wrapper hw-screen-box relative aspect-square flex items-center justify-center bg-stone-900 rounded-lg border-2 border-slate-950 overflow-hidden shadow-inner">
               <div class="screen-glare"></div>
-              <canvas id="canvas-gbc" class="w-full h-full object-contain cursor-crosshair"></canvas>
+              <canvas id="canvas-gbc" class="w-full h-full object-contain"></canvas>
             </div>
           </div>
 
@@ -345,7 +345,7 @@
 
             <div class="canvas-container crt-screen-wrapper hw-screen-box relative aspect-square flex items-center justify-center bg-stone-950 rounded-2xl border-2 border-stone-800 overflow-hidden shadow-inner">
               <div class="screen-glare"></div>
-              <canvas id="canvas-tv" class="w-full h-full object-contain cursor-crosshair"></canvas>
+              <canvas id="canvas-tv" class="w-full h-full object-contain"></canvas>
             </div>
           </div>
 
@@ -392,7 +392,7 @@
 
               <div class="canvas-container crt-screen-wrapper hw-screen-box relative aspect-square flex items-center justify-center bg-slate-950 rounded border border-slate-800 overflow-hidden shadow-inner">
                 <div class="screen-glare"></div>
-                <canvas id="canvas-lenovo" class="w-full h-full object-contain cursor-crosshair"></canvas>
+                <canvas id="canvas-lenovo" class="w-full h-full object-contain"></canvas>
               </div>
 
               <div class="shell-hardware-el w-full mt-1 lg:mt-1.5 flex items-center justify-end px-1" aria-hidden="true">
@@ -489,7 +489,7 @@
               <div class="psp-screen-bezel p-1.5 lg:p-3 flex flex-col items-center justify-center relative">
                 <div class="canvas-container crt-screen-wrapper hw-screen-box relative aspect-square flex items-center justify-center bg-black rounded border border-zinc-800 overflow-hidden shadow-inner">
                   <div class="screen-glare"></div>
-                  <canvas id="canvas-psp" class="w-full h-full object-contain cursor-crosshair"></canvas>
+                  <canvas id="canvas-psp" class="w-full h-full object-contain"></canvas>
                 </div>
               </div>
 
@@ -575,7 +575,7 @@
             In computing, a bit is the smallest unit of digital information, a single binary signal, and in classic graphics it recalls the early pixel eras where every square on screen counted. Here, it is both a tiny block of color on the grid and a small piece of an idea taking shape.
           </p>
           <p>
-            Welcome to <strong>An Artistic Bit</strong>, a pixel studio and physics sandbox built for play and imagination. Whether you are sketching a sprite, testing symmetry, or letting sand gravity and heat bleed carry a drawing somewhere unexpected, each display theme shifts the mood of the workspace. When you make something you like, you can stamp it into a Souvenir Card so it becomes a small keepsake you can save and keep.
+            Welcome to <strong>An Artistic Bit</strong>, a pixel studio and physics sandbox built for play and imagination. Whether you are sketching a sprite, testing symmetry, or letting sand gravity and ember heat carry a drawing somewhere unexpected, each display theme shifts the mood of the workspace. When you make something you like, you can stamp it into a Souvenir Card so it becomes a small keepsake you can save and keep.
           </p>
         </div>
 
@@ -601,51 +601,42 @@
 
       <div class="text-center mb-4">
         <h3 class="text-lg md:text-xl font-bold theme-modal-title">Souvenir Card</h3>
-        <p class="text-xs font-code opacity-65">Hardware Collectible &amp; Metadata Stamp</p>
       </div>
 
-      <div id="souvenir-card-container" class="bg-slate-950 text-slate-100 border border-slate-700 rounded-lg p-4 md:p-5 shadow-inner space-y-3.5">
-        <div class="flex items-center justify-between border-b border-white/10 pb-3">
-          <div class="flex items-center space-x-2">
-            <div class="w-2.5 h-2.5 rounded-sm bg-lime-400"></div>
-            <span class="text-xs font-code font-bold tracking-wider" id="souvenir-card-title">AN ARTISTIC BIT • NIGHT</span>
+      <div id="souvenir-card-container" class="border rounded-lg p-4 md:p-5 shadow-inner space-y-4">
+        <div id="souvenir-card-header" class="flex items-center justify-between gap-2 border-b pb-3">
+          <div class="flex items-center space-x-2 min-w-0">
+            <div id="souvenir-title-dot" class="w-2.5 h-2.5 rounded-sm shrink-0"></div>
+            <span class="text-sm md:text-base font-bold truncate" id="souvenir-card-title">An Artistic Bit • Night</span>
           </div>
-          <span id="souvenir-timestamp" class="text-[10px] font-code opacity-60">2026.11.26</span>
+          <span id="souvenir-timestamp" class="text-[11px] shrink-0">2026.11.27</span>
         </div>
 
         <div class="flex justify-center my-2">
-          <div id="souvenir-preview-box" class="p-3 bg-slate-900 border border-slate-800 rounded-lg shadow-inner">
-            <img id="souvenir-preview-img" class="w-40 h-40 md:w-44 md:h-44 object-contain rounded border border-white/10" alt="Canvas Souvenir Artwork" />
+          <div id="souvenir-preview-box" class="border rounded-lg overflow-hidden shadow-inner">
+            <img id="souvenir-preview-img" class="w-44 h-44 md:w-48 md:h-48 object-contain block" alt="Canvas Souvenir Artwork" />
           </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-left font-code">
-          <div class="p-2 bg-slate-900 rounded border border-slate-800">
-            <div class="text-[9px] opacity-60 uppercase">Hardware Theme</div>
-            <div id="souvenir-housing" class="text-xs font-bold text-lime-300">Night</div>
+        <div class="grid grid-cols-2 gap-2.5 text-left">
+          <div class="souvenir-stat-box p-2.5 rounded border">
+            <div class="souvenir-stat-label text-[10px] opacity-65 uppercase tracking-wider">Active Pixels</div>
+            <div id="souvenir-pixels" class="souvenir-stat-value text-xs md:text-sm font-bold">0</div>
           </div>
-          <div class="p-2 bg-slate-900 rounded border border-slate-800">
-            <div class="text-[9px] opacity-60 uppercase">Active Pixels</div>
-            <div id="souvenir-pixels" class="text-xs font-bold text-cyan-300">0</div>
+          <div class="souvenir-stat-box p-2.5 rounded border">
+            <div class="souvenir-stat-label text-[10px] opacity-65 uppercase tracking-wider">Canvas Mode</div>
+            <div id="souvenir-res" class="souvenir-stat-value text-xs md:text-sm font-bold">Freehand (256x256)</div>
           </div>
-          <div class="p-2 bg-slate-900 rounded border border-slate-800">
-            <div class="text-[9px] opacity-60 uppercase">Entropy Score</div>
-            <div id="souvenir-entropy" class="text-xs font-bold text-amber-300">0.00 bits</div>
-          </div>
-          <div class="p-2 bg-slate-900 rounded border border-slate-800">
-            <div class="text-[9px] opacity-60 uppercase">Canvas Mode</div>
-            <div id="souvenir-res" class="text-xs font-bold">32 x 32</div>
-          </div>
-          <div class="p-2 bg-slate-900 rounded border border-slate-800">
-            <div class="text-[9px] opacity-60 uppercase">Dominant Hue</div>
-            <div id="souvenir-dominant" class="text-xs font-bold flex items-center space-x-1">
-              <span id="souvenir-dominant-swatch" class="w-2.5 h-2.5 rounded-full inline-block bg-indigo-500"></span>
+          <div class="souvenir-stat-box p-2.5 rounded border">
+            <div class="souvenir-stat-label text-[10px] opacity-65 uppercase tracking-wider">Dominant Hue</div>
+            <div id="souvenir-dominant" class="souvenir-stat-value text-xs md:text-sm font-bold flex items-center space-x-1.5">
+              <span id="souvenir-dominant-swatch" class="w-2.5 h-2.5 rounded-full inline-block shrink-0 bg-indigo-500"></span>
               <span id="souvenir-dominant-hex">#6366F1</span>
             </div>
           </div>
-          <div class="p-2 bg-slate-900 rounded border border-slate-800">
-            <div class="text-[9px] opacity-60 uppercase">Verification</div>
-            <div class="text-[10px] opacity-70 truncate">#BIT-2026-OK</div>
+          <div class="souvenir-stat-box p-2.5 rounded border">
+            <div class="souvenir-stat-label text-[10px] opacity-65 uppercase tracking-wider">Entropy Score</div>
+            <div id="souvenir-entropy" class="souvenir-stat-value text-xs md:text-sm font-bold">0.00 bits</div>
           </div>
         </div>
       </div>
@@ -656,7 +647,7 @@
         </button>
         <button onclick="app.downloadSouvenirCard()" class="px-5 py-2 rounded-lg theme-btn-accent font-bold text-xs shadow transition flex items-center space-x-2">
           <i class="fa-solid fa-download"></i>
-          <span>Download PNG Card</span>
+          <span>Download</span>
         </button>
       </div>
     </div>
