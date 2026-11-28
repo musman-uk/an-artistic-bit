@@ -29,7 +29,7 @@ A simplified view of how the website is being developed:
 
 | Stage         | Location                | Purpose                                                |
 |---------------|-------------------------|--------------------------------------------------------|
-| Code          | `src/`                  | Canvas tools, physics reactors, synth, and UI are developed |
+| Write          | `src/`                  | Canvas tools, physics reactors, synth, and UI are developed |
 | Build         | `package.json` & Parcel | Parcel bundles ES modules, stylesheets, and assets     |
 | Automate      | `.github/workflows/`    | Actions workflow compiles code upon commit or manual dispatch |
 | Deploy        | GitHub Pages            | Production build output (`dist/`) served directly to the web |
